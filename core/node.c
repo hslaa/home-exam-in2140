@@ -4,4 +4,10 @@
  *
  *
  *
- * /
+ */
+
+#include "../util/logger.h"
+
+int main() {
+    logger("DEBUG", "Node starting");
+}
