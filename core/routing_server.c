@@ -4,3 +4,12 @@
  *
  *
  */ 
+
+#include "../util/logger.h"
+
+int main() {
+
+    logger("DEBUG", "Starting routing_server");
+
+    return 0;
+}
