@@ -9,7 +9,14 @@
 include 
 
 struct Node extract_min(struct Node n*) {
+    // Find the node with the smallest distance
+    //
+
+    // Memmove the last item of the list to them index we just
+    // retrieved the node from
     
+    // Free the allocated memory for the smallest node  
+
 
     
 
