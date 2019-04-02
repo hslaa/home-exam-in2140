@@ -19,11 +19,12 @@ typedef struct Connection {
 } Connection;
 
 typedef struct Node {
-
     int own_address;
     int port; // do I need this?    
     int number_of_connections;
     Connection *connections;
+
+    int distance;
 
 } Node;
 
