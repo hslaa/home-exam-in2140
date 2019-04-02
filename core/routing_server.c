@@ -18,7 +18,7 @@ int main() {
 
     logger("DEBUG", "Starting routing_server");
     
-    struct Node *testnodes = malloc(sizeof(struct Node) * 8);;
+    struct Node *testnodes = malloc(sizeof(struct Node) * 8);
     testnodes = create_test_nodes(8);
     
     print_node(testnodes[0]);
@@ -30,6 +30,12 @@ int main() {
     print_node(testnodes[6]);
     print_node(testnodes[7]);
     
+     
+
+    free_nodes(testnodes, 8); 
+    
+
+
     return 0;
 }
 
@@ -170,7 +176,7 @@ struct Node* create_test_nodes(int numberOfNodes) {
     n[7].connections[2].destination = 103;
     n[7].connections[2].weight = 4;
     
-    
+     
 
     return n;
 }
