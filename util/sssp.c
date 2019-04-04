@@ -18,15 +18,6 @@ void sssp(struct Node *n, struct Node source, int size);
 void generate_routing_tables(void);
 
 
-
-
-int main() {
-    
-    printf("hei"); 
-
-    return 0;
-}
-
 void sssp(struct Node *n, struct Node source, int size) {
     struct Node** q;
     struct Node* u;
@@ -51,24 +42,28 @@ void sssp(struct Node *n, struct Node source, int size) {
     //  source.distance = 0;
     source.distance = 0;
 
+    // Does this remove the unused parameter warning?
+    if (source.distance == 0) {
+        
+    }
     
     //  while Q is not empty:
-        u = extract_min(q); 
-        while(u != NULL) {
-            
-            //for each connection in u.connections
-            while (j < u->number_of_connections) {
-                c = u->connections[j];
-                alt = u->distance + c.weight;
-                if (alt < c.destination->distance) {
-                    c.destination->distance = alt;
-                    c.destination->previous = u; 
-                }
-                j += 1;
+    u = extract_min(q); 
+    j = 0;
+    while(u != NULL) {     
+        //for each connection in u.connections
+        while (j < u->number_of_connections) {
+            c = u->connections[j];
+            alt = u->distance + c.weight;
+            if (alt < c.destination->distance) {
+                c.destination->distance = alt;
+                c.destination->previous = u; 
             }
-            j = 0;
-            u = extract_min(q);
+            j += 1;
         }
+        j = 0;
+        u = extract_min(q);
+    }
     //
     //  return results. 
     //              
