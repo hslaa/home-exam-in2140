@@ -8,60 +8,67 @@
  */
 #include <string.h> 
 #include <math.h>
+#include <stdio.h>
 
 #include "../core/types/networktypes.h"
 #include "../util/helpers.h"
+#include "q.h"
 
-struct Node extract_min(struct Node *n, int size_of_array) {
-    double min = INFINITY; // math.h
-    int min_index;
-    int i;
-    struct Node tmp_node;
-    // Find the node with the smallest distance
-    while (i < size_of_array) {
-        if (n[i].distance < min) { /* This might fail because nodes are initialized to INF (Dijkstra) */
-            min_index = i;
-            min = n[i].distance;
-        }
-    }
-    tmp_node = n[min_index];
+void sssp(struct Node *n, struct Node source, int size);
+void generate_routing_tables(void);
 
 
 
-    // Memmove the last item of the list to them index we just
-    // retrieved the node from
-    memcpy(&n[min_index], &n[size_of_array], sizeof(struct Node));
 
-
-
-    // Free the allocated memory for the smallest node  
-
-
+int main() {
     
+    printf("hei"); 
 
+    return 0;
 }
 
-
-void sssp(struct Node *n, struct Node source) {
-
+void sssp(struct Node *n, struct Node source, int size) {
+    struct Node** q;
+    struct Node* u;
+    struct Connection c;
+    int alt;
+    int i;
+    int j;
     //  Initialize a priority queue Q.
     //  Q sorts based on node.distance
-
+    q = initialize_queue(n, size);        
+    
     //  for each NODE in n*
     //      n[i].distance = INF;
     //      n[i].previous = NULL;
+    for (i = 0; i < size; i++) {
+        n[i].distance = INFINITY;
+        n[i].previous = NULL;
+    }
+    
+    
     
     //  source.distance = 0;
+    source.distance = 0;
+
     
     //  while Q is not empty:
-    //      u = Q.extractMin()
-    //      (removing u from Q)
-    //
-    //      for each connection in u.connections
-    //          alt = u.distance + (u.distance + connection.weight)
-    //          if alt < connection.destination.distance:
-    //              connection.destination.distance = alt:
-    //              connection.destination.previous = u;
+        u = extract_min(q); 
+        while(u != NULL) {
+            
+            //for each connection in u.connections
+            while (j < u->number_of_connections) {
+                c = u->connections[j];
+                alt = u->distance + c.weight;
+                if (alt < c.destination->distance) {
+                    c.destination->distance = alt;
+                    c.destination->previous = u; 
+                }
+                j += 1;
+            }
+            j = 0;
+            u = extract_min(q);
+        }
     //
     //  return results. 
     //              
