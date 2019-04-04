@@ -115,3 +115,91 @@ struct Node* create_test_nodes() {
     n[6].own_address = 17;
     n[6].number_of_connections = 2;    
     n[6].connections = malloc(sizeof(struct Connection) * 2);
+
+    // New node
+    n[7].own_address = 107;
+    n[7].number_of_connections = 3;
+    
+    n[7].connections = malloc(sizeof(struct Connection) * 3);
+
+       
+    n[0].connections[0].destination = get_pointer_to_node(11, 8, n);
+    n[0].connections[0].weight = 2;
+    
+    n[0].connections[1].destination = get_pointer_to_node(103, 8, n);
+    n[0].connections[1].weight = 6;
+
+    
+    n[1].connections[0].destination = get_pointer_to_node(1, 8, n);
+    n[1].connections[0].weight = 2;
+    
+    n[1].connections[1].destination = get_pointer_to_node(19, 8, n);
+    n[1].connections[1].weight = 2;
+    
+    n[1].connections[2].destination = get_pointer_to_node(13, 8, n);
+    n[1].connections[2].weight = 7;
+    
+    
+    
+    n[2].connections[0].destination = get_pointer_to_node(11, 8, n);
+    n[2].connections[0].weight = 2;
+
+    n[2].connections[1].destination = get_pointer_to_node(101, 8, n);
+    n[2].connections[1].weight = 2;
+
+    n[2].connections[2].destination = get_pointer_to_node(103, 8, n);
+    n[2].connections[2].weight = 1;
+
+
+
+    n[3].connections[0].destination = get_pointer_to_node(11, 8, n);
+    n[3].connections[0].weight = 6;
+
+    n[3].connections[1].destination = get_pointer_to_node(19, 8, n);
+    n[3].connections[1].weight = 1;
+
+    n[3].connections[2].destination = get_pointer_to_node(107, 8, n);
+    n[3].connections[2].weight = 4;
+
+
+    n[4].connections[0].destination = get_pointer_to_node(11, 8, n);
+    n[4].connections[0].weight = 7;
+
+    n[4].connections[1].destination = get_pointer_to_node(101, 8, n);
+    n[4].connections[1].weight = 4;
+
+    n[4].connections[2].destination = get_pointer_to_node(17, 8, n);
+    n[4].connections[2].weight = 3;
+
+    n[5].connections[0].destination = get_pointer_to_node(13, 8, n);
+    n[5].connections[0].weight = 4;
+
+    n[5].connections[1].destination = get_pointer_to_node(19, 8, n);
+    n[5].connections[1].weight = 2;
+
+    
+    n[5].connections[2].destination = get_pointer_to_node(107, 8, n);
+    n[5].connections[2].weight = 2;
+
+    
+   
+    n[6].connections[0].destination = get_pointer_to_node(13, 8, n);
+    n[6].connections[0].weight = 3;
+
+    n[6].connections[1].destination = get_pointer_to_node(107, 8, n);
+    n[6].connections[1].weight = 2;
+
+    
+    n[7].connections[0].destination = get_pointer_to_node(17, 8, n);
+    n[7].connections[0].weight = 2;
+  
+    n[7].connections[1].destination = get_pointer_to_node(101, 8, n);
+    n[7].connections[1].weight = 2;
+   
+    n[7].connections[2].destination = get_pointer_to_node(103, 8, n);
+    n[7].connections[2].weight = 4;
+    
+
+    return n;
+}
+    
