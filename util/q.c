@@ -31,8 +31,8 @@ struct Node** initialize_queue(struct Node *n, int size_q) {
 
 struct Node* extract_min(struct Node **q) {
     int i;
-    double min_distance = 2000;
-    int min_index = 0;
+    double min_distance = INFINITY;
+   
     
     struct Node *ret_node;
     
