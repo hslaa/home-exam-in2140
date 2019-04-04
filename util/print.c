@@ -18,7 +18,7 @@ void print_node(struct Node node) {
         c = node.connections[i];
         printf("\t %d", node.own_address);
         printf(" -> ");
-        printf("%d", c.destination);
+        printf("%d", c.destination->own_address);
         printf(" (%d)\n", c.weight);
         i += 1; 
     }
