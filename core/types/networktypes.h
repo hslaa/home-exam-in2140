@@ -24,7 +24,9 @@ typedef struct Node {
     int number_of_connections;
     Connection *connections;
 
+    // For SSSP
     int distance;
+    struct Node* next;
 
 } Node;
 
