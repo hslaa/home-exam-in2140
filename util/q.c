@@ -35,6 +35,10 @@ struct Node* extract_min(struct Node **q) {
     int min_index = 0;
     
     struct Node *ret_node;
+    
+    if (size_of_q == 0) {
+        return NULL;
+    }
 
     i = 0;
     while (i < size_of_q) {
@@ -51,6 +55,7 @@ struct Node* extract_min(struct Node **q) {
         i += 1;
     
     }
+    size_of_q -= 1;
     return ret_node;    
 }
 
