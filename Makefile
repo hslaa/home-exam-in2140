@@ -1,4 +1,4 @@
-CCFLAGS= -g 
+CCFLAGS = -g -Wall -Wextra -Wpedantic -std=c99
 
 all: routing_server node
 
