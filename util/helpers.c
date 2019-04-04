@@ -65,4 +65,53 @@ void free_nodes(struct Node *n, int number_of_nodes) {
     free(n);
 }
 
+struct Node* create_test_nodes() {
+    // Creating nodes as in graph_1.pdf sample
+    struct Node *n = malloc(sizeof(struct Node) * 8);
+   
+    
+    // New Node    
+    n[0].own_address = 1;
+    n[0].number_of_connections = 2;
+    n[0].connections = malloc(sizeof(struct Connection) * 2);
+    
+       
 
+    // New Node
+    n[1].own_address = 11;
+    n[1].number_of_connections = 3;
+    n[1].connections = malloc(sizeof(struct Connection) * 3); 
+  
+
+    
+    // New Node
+    n[2].own_address = 19;
+    n[2].number_of_connections = 3;
+    n[2].connections = malloc(sizeof(struct Connection) * 3);
+
+   
+
+    // New Node
+    n[3].own_address = 103;
+    n[3].number_of_connections = 3;
+    n[3].connections = malloc(sizeof(struct Connection) * 3);
+    
+    
+
+    // New Node
+    n[4].own_address = 13;
+    n[4].number_of_connections = 3;
+    n[4].connections = malloc(sizeof(struct Connection) * 3);
+    
+    
+
+    // New Node
+    n[5].own_address = 101;
+    n[5].number_of_connections = 3;
+    n[5].connections = malloc(sizeof(struct Connection) * 3);
+    
+
+    // New Node
+    n[6].own_address = 17;
+    n[6].number_of_connections = 2;    
+    n[6].connections = malloc(sizeof(struct Connection) * 2);
