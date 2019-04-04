@@ -24,9 +24,9 @@ static unsigned int validate_packet( unsigned char* packet )
     {
         return INCOMPLETE_PACKET;
     }
-
+    /* Unused variables
     unsigned short source = ntohs( *(short*)&packet[2] );
-    unsigned short dest   = ntohs( *(short*)&packet[4] );
+    unsigned short dest   = ntohs( *(short*)&packet[4] );*/
     char           *msg    = (char*)&packet[6];
 
     if( length > 1500 )
@@ -84,8 +84,11 @@ static void print_msg( FILE* logfile, unsigned int chk, short ownAddress, char* 
         char*          msg;
         
         length = ntohs( *(short*)&packet[0] );
+	/* Switched source and dest
         source = ntohs( *(short*)&packet[2] );
-        dest   = ntohs( *(short*)&packet[4] );
+        dest   = ntohs( *(short*)&packet[4] );*/
+	dest   = ntohs( *(short*)&packet[2] );
+	source = ntohs( *(short*)&packet[4] );
         msg    = (char*)&packet[6];
 
         if( chk & LEN_SWAP )
