@@ -4,17 +4,17 @@
 //struct Node;
 //struct Connection;
 
-
+/*
 typedef struct Graph {
     // Graph
 } Graph;
-
+*/
 
 
 typedef struct Connection {
 
     int weight;
-    int destination;
+    struct Node* destination;
 
 } Connection;
 
@@ -27,6 +27,7 @@ typedef struct Node {
     // For SSSP
     int distance;
     struct Node* next;
+    struct Node* previous;
 
 } Node;
 
