@@ -2,7 +2,7 @@ CCFLAGS = -g -Wall -Wextra -Wpedantic -std=c99
 
 all: routing_server node
 
-UTILS = util/helpers.c util/print.c util/logger.c
+UTILS = util/q.c util/sssp.c util/helpers.c util/print.c util/logger.c
 
 
 routing_server: $(UTILS) core/routing_server.c
