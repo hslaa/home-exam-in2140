@@ -122,14 +122,14 @@ struct Node* create_test_nodes() {
     
     n[7].connections = malloc(sizeof(struct Connection) * 3);
 
-       
+    // Node 1   
     n[0].connections[0].destination = get_pointer_to_node(11, 8, n);
     n[0].connections[0].weight = 2;
     
     n[0].connections[1].destination = get_pointer_to_node(103, 8, n);
     n[0].connections[1].weight = 6;
 
-    
+    // Node 11
     n[1].connections[0].destination = get_pointer_to_node(1, 8, n);
     n[1].connections[0].weight = 2;
     
@@ -140,7 +140,7 @@ struct Node* create_test_nodes() {
     n[1].connections[2].weight = 7;
     
     
-    
+    // Node 19
     n[2].connections[0].destination = get_pointer_to_node(11, 8, n);
     n[2].connections[0].weight = 2;
 
@@ -151,8 +151,8 @@ struct Node* create_test_nodes() {
     n[2].connections[2].weight = 1;
 
 
-
-    n[3].connections[0].destination = get_pointer_to_node(11, 8, n);
+    // Node 103
+    n[3].connections[0].destination = get_pointer_to_node(1, 8, n);
     n[3].connections[0].weight = 6;
 
     n[3].connections[1].destination = get_pointer_to_node(19, 8, n);
@@ -162,6 +162,7 @@ struct Node* create_test_nodes() {
     n[3].connections[2].weight = 4;
 
 
+    // Node 13
     n[4].connections[0].destination = get_pointer_to_node(11, 8, n);
     n[4].connections[0].weight = 7;
 
@@ -171,6 +172,8 @@ struct Node* create_test_nodes() {
     n[4].connections[2].destination = get_pointer_to_node(17, 8, n);
     n[4].connections[2].weight = 3;
 
+
+    // Node 101
     n[5].connections[0].destination = get_pointer_to_node(13, 8, n);
     n[5].connections[0].weight = 4;
 
@@ -182,14 +185,14 @@ struct Node* create_test_nodes() {
     n[5].connections[2].weight = 2;
 
     
-   
+    // Node 17
     n[6].connections[0].destination = get_pointer_to_node(13, 8, n);
     n[6].connections[0].weight = 3;
 
     n[6].connections[1].destination = get_pointer_to_node(107, 8, n);
     n[6].connections[1].weight = 2;
 
-    
+    // Node 107
     n[7].connections[0].destination = get_pointer_to_node(17, 8, n);
     n[7].connections[0].weight = 2;
   
