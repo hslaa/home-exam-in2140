@@ -29,7 +29,19 @@ typedef struct Node {
     struct Node* next;
     struct Node* previous;
 
+    // For routing table 
+    struct routing_table* rt;
+
 } Node;
 
+typedef struct hop {
+    int destination;
+    int next_hop;
+} hop;
+
+typedef struct routing_table {
+    int size_of_rt;
+    struct hop** hops;
+} routing_table;
 
 #endif
