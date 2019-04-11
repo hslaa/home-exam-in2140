@@ -18,6 +18,7 @@
 struct Node* create_test_nodes();
 int test_sssp(struct Node *n, struct Node source, int size);
 
+int free_routing_tables(struct Node *n, int size);
 int test_routing_tables(struct Node* node); 
 int create_routing_tables(struct Node *n, int size); 
 int is_node_on_shortest_path(struct Node* destination, struct Node* intermediate);
@@ -43,8 +44,9 @@ int main() {
     
     create_routing_tables(testnodes, 8);
     test_routing_tables(&testnodes[6]);
+    free_routing_tables(testnodes, 8);
     free_nodes(testnodes, 8); 
-    
+
     return 0;
 }
 
@@ -110,6 +112,22 @@ int insert_hop_in_routing_table(struct Node* node, int dst, int n_hop) {
     node->rt->size_of_rt += 1;
     
 
+
+    return 0;
+}
+
+int free_routing_tables(struct Node *n, int size) {
+    int i;
+    int j;
+    for (i = 0; i < size; i++) {
+        printf("i = %d\n", i); 
+        for (j = 0; j < n[i].rt->size_of_rt; j++) {
+            printf("freeing n[%d].rt->hops[%d]\n", i, j);
+            free(n[i].rt->hops[j]);
+        }
+        free(n[i].rt->hops);
+        free(n[i].rt);
+    }
 
     return 0;
 }
