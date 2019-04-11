@@ -18,6 +18,8 @@
 struct Node* create_test_nodes();
 int test_sssp(struct Node *n, struct Node source, int size);
 
+int test_routing_tables(struct Node* node); 
+int create_routing_tables(struct Node *n, int size); 
 int is_node_on_shortest_path(struct Node* destination, struct Node* intermediate);
 
 int main() {
@@ -38,7 +40,9 @@ int main() {
     
 
     test_sssp(testnodes, testnodes[0], 8);
-
+    
+    create_routing_tables(testnodes, 8);
+    test_routing_tables(&testnodes[6]);
     free_nodes(testnodes, 8); 
     
     return 0;
@@ -55,10 +59,10 @@ int test_sssp(struct Node *n, struct Node source, int size) {
     
     
     for (i = 0; i < size; i++) {
-
-        for (j = 0; j < n[i].number_of_connections; j++) {
-            pathlen = is_node_on_shortest_path(&n[i], n[i].connections[j].destination);
-            print_weighted_edge(n[i].own_address, n[i].connections[j].destination->own_address, pathlen);
+        for (j = 0; j < size; j++) {
+            pathlen = is_node_on_shortest_path(&n[i], &n[j]);
+            logger("DEBUG", "Running print_weighted_edge()");
+            print_weighted_edge(n[i].own_address, n[j].own_address, pathlen);
         }
     }
     
@@ -72,42 +76,109 @@ int test_sssp(struct Node *n, struct Node source, int size) {
             //cost += tmpNode->distance;
             tmpNode = tmpNode->previous;
         }
-        printf("(%d)\n", n[i].distance);
+        printf("1 (%d)\n", n[i].distance);
     }
 
     return 0;
 }
 
-int is_node_on_shortest_path(struct Node* destination, struct Node* intermediate) {
 
-    struct Node* tmpNode;
-    int pathlen = 1;
-    int hit_root = 0;
-    tmpNode = destination;
-    while (tmpNode != NULL) {
+int initialize_routing_table(struct Node *n, int size) {
+    int i;
+    printf("starting initialize_routing_table with size %d\n", size);
+    for (i = 0; i < size; i++) {    
+        n[i].rt = malloc( sizeof ( struct routing_table ) );
+        n[i].rt->hops = malloc( sizeof( struct hop** ) * size );
+        n[i].rt->size_of_rt = 0;
+    }
+    return 0;
+}
+
+int insert_hop_in_routing_table(struct Node* node, int dst, int n_hop) {
+    int size = node->rt->size_of_rt;
+    
+    node->rt->hops[size] = malloc(sizeof(struct hop*)); 
+    
+    node->rt->hops[size]->destination = dst;
+    node->rt->hops[size]->next_hop = n_hop;
+    
+    printf("Finished adding hop <%d:%d> to node %d\n", 
+            node->rt->hops[size]->destination,
+            node->rt->hops[size]->next_hop,
+            node->own_address
+          );
+    node->rt->size_of_rt += 1;
+    
+
+
+    return 0;
+}
+
+int test_routing_tables(struct Node* node) {
+    int i;
+    struct hop* h;
+    for (i = 0; i < node->rt->size_of_rt; i++) {
+        h = node->rt->hops[i];
+        printf("=== HOP ===\n");
+        printf("to %d: jump to %d)\n", h->destination, h->next_hop);
+        printf("===========\n\n");
+    }
+
+    return 0;
+}
+
+int create_routing_tables(struct Node *n, int size) {
+    int i;
+    struct Node* tmp_node;
+    initialize_routing_table(n, size);
+    for (i = 0; i < size; i++) {
+        //  
+        //  For hver node
+        //  Malloc plass
+        //  tmpNode = node
+        //  while (tmpNode != NULL) 
+        //      sett på tmpNode->previous:  <NODE.own_address, NODE.own_address)
+       
+        //
+      
         
-        
-        if (tmpNode->own_address == 1) {
-            printf("we hit roooot\n");
-            hit_root = 1;
-        }
-        tmpNode = tmpNode->previous;
 
+        tmp_node = &n[i]; 
+        while (tmp_node->previous != NULL) {            
+            insert_hop_in_routing_table(tmp_node->previous, n[i].own_address, tmp_node->own_address); 
+            tmp_node = tmp_node->previous;
 
+        } 
+         
     }
     
-    if (!hit_root) {
-        pathlen = -1; 
+    return 0;
+}
 
+int is_node_on_shortest_path(struct Node* destination, struct Node* intermediate) {
+    int hit_intermediate = 0;
+    int pathlen = destination->distance;
+    struct Node* tmp_node;
+    logger("DEBUG", "running is_node_on_shortest_path"); 
+    tmp_node = destination;
+    while(tmp_node->previous != NULL) {
+        
+        if (tmp_node->own_address == intermediate->own_address) {
+            hit_intermediate = 1;   
+        }
+             
+        tmp_node = tmp_node->previous;
     }
-
-
-    printf("Returning %d for pathlen (destination node %d has distance %d from node 1)\n",
+ 
+    if (hit_intermediate) {
+        pathlen = -1;
+    }
+    
+    printf("Returning %d for pathlen (destination node %d has distacne %d from node 1", 
             pathlen,
             destination->own_address,
             destination->distance
           );
-
 
     return pathlen;
 }
