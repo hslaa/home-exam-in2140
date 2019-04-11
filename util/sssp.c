@@ -71,10 +71,8 @@ void sssp(struct Node *n, struct Node source, int size) {
         j = 0;
         u = extract_min(q); 
     }
-    //
-    //  return results. 
-    //              
-    //  but how should the results looook liiiike.
+    
+    free_queue(q);
 }
 
 
