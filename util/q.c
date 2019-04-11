@@ -115,7 +115,16 @@ struct Node* extract_min(struct Node **q) {
 
 }
 
+int free_queue(struct Node **q) {
+    int i;
 
+    for (i = 0; i < size_of_q; i++) {
+        
+        free(q[i]);
+    }
+    free(q);
+    printf("Finished freeing %d queue elements", i);
+}
 /*
 int main() {
 
