@@ -21,7 +21,9 @@ void generate_routing_tables(void);
 void sssp(struct Node *n, struct Node source, int size) {
     struct Node** q;
     struct Node* u;
+    struct Node* d;
     struct Connection c;
+  
     int alt;
     int i;
     int j;
@@ -56,13 +58,14 @@ void sssp(struct Node *n, struct Node source, int size) {
         //for each connection in u.connections
         while (j < u->number_of_connections) {
             c = u->connections[j];
+            d = get_pointer_to_node(u->connections[j].destination, size, n);
             alt = u->distance + c.weight;
-            printf("%d < %d", alt, c.destination->distance);
-            if (alt < c.destination->distance) {
+            printf("%d < %d", alt, d->distance);
+            if (alt < d->distance) {
                 printf(" (TRUE)\n");
                 printf("Setting distance to: %d\n", alt);
-                c.destination->distance = alt;
-                c.destination->previous = u; 
+                d->distance = alt;
+                d->previous = u; 
             } else {
                 printf(" (FALSE)\n");
             }
