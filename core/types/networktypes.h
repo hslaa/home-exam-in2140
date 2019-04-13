@@ -14,7 +14,7 @@ typedef struct Graph {
 typedef struct Connection {
 
     int weight;
-    struct Node* destination;
+    int destination;
 
 } Connection;
 
