@@ -84,7 +84,7 @@ int test_sssp(struct Node *n, struct Node source, int size) {
     return 0;
 }
 
-
+/*
 int initialize_routing_table(struct Node *n, int size) {
     int i;
     printf("starting initialize_routing_table with size %d\n", size);
@@ -172,7 +172,7 @@ int create_routing_tables(struct Node *n, int size) {
     
     return 0;
 }
-
+*/
 int is_node_on_shortest_path(struct Node* destination, struct Node* intermediate) {
     int hit_intermediate = 0;
     int pathlen = destination->distance;
