@@ -128,6 +128,19 @@ int insert_hop_in_routing_table(struct Node* node, int dst, int n_hop) {
     return 0;
 }
 
+int free_routing_table(struct Node node) {
+    int i; 
+    int size;
+
+    size = node.rt->size_of_rt;
+    for (i = 0; i < size; i++) {
+        free(node.rt->hops[i]);
+    }
+    free(node.rt->hops);
+    free(node.rt);
+    return 0;
+}
+
 int free_routing_tables(struct Node *n, int size) {
     int i;
     int j;
