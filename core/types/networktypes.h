@@ -1,6 +1,8 @@
 #ifndef networktypes
 #define networktypes
 
+#include <stdint.h>
+
 //struct Node;
 //struct Connection;
 
@@ -9,7 +11,7 @@ typedef struct Graph {
     // Graph
 } Graph;
 */
-
+#define RIDICULOUSLY_MUCH_SPACE = 1024;
 
 typedef struct Connection {
 
@@ -43,5 +45,15 @@ typedef struct routing_table {
     int size_of_rt;
     struct hop** hops;
 } routing_table;
+
+
+
+typedef struct packet {
+    uint16_t packet_length;
+    uint16_t destination_address;
+    uint16_t source_address;
+    unsigned char message[2048]; 
+} packet;
+
 
 #endif
