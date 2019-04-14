@@ -84,13 +84,26 @@ void free_nodes(struct Node *n, int number_of_nodes) {
 
 
 
-int initialize_routing_table(struct Node *n, int size) {
+int initialize_routing_table(struct Node* n, int size) { 
+    n->rt = malloc( sizeof ( struct routing_table ) );
+    n->rt->size_of_rt = 0;
+    
+    printf("Initialized routing_table of Node %d", n->own_address);
+
+    if (size > 0) {
+        n->rt->hops = malloc( sizeof( struct hop** ) * size );
+    } 
+
+    return 0;
+}
+int initialize_routing_tables(struct Node *n, int size) {
     int i;
-    printf("starting initialize_routing_table with size %d\n", size);
+    printf("starting initialize_routing_tables with size %d\n", size);
     for (i = 0; i < size; i++) {    
         n[i].rt = malloc( sizeof ( struct routing_table ) );
-        n[i].rt->hops = malloc( sizeof( struct hop** ) * size );
         n[i].rt->size_of_rt = 0;
+        n[i].rt->hops = malloc( sizeof( struct hop** ) * size );
+        
     }
     return 0;
 }
@@ -135,6 +148,7 @@ int free_routing_tables(struct Node *n, int size) {
 int test_routing_tables(struct Node* node) {
     int i;
     struct hop* h;
+    printf("Testing routing table of size %d\n", node->rt->size_of_rt);
     for (i = 0; i < node->rt->size_of_rt; i++) {
         h = node->rt->hops[i];
         printf("=== HOP ===\n");
@@ -148,7 +162,7 @@ int test_routing_tables(struct Node* node) {
 int create_routing_tables(struct Node *n, int size) {
     int i;
     struct Node* tmp_node;
-    initialize_routing_table(n, size);
+    initialize_routing_tables(n, size);
     for (i = 0; i < size; i++) {
         //  
         //  For hver node
