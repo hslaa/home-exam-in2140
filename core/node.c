@@ -12,10 +12,14 @@
 #include "../util/logger.h"
 #include "types/networktypes.h"
 #include "../util/helpers.h"
-
+#include "../util/transmission.h"
 
 int create_test_hops(struct Node* node); 
 int parse_connection(struct Node* node, char c[]);
+int read_file(char* file_name);
+
+struct Node this;
+
 
 int main(int argc, char *argv[]) {
     int number_of_connections;
@@ -28,7 +32,7 @@ int main(int argc, char *argv[]) {
 
     number_of_connections = argc-3;
 
-    struct Node this;
+   
     this.port = atoi(argv[1]);
     this.own_address = atoi(argv[2]);
 
@@ -48,8 +52,64 @@ int main(int argc, char *argv[]) {
     
     test_routing_tables(&this);
 
+
+    if (this.own_address == 1) {
+        
+        printf("This is node 1.\n");
+        read_file("messages_1.txt");
+        // I am Node 1, I should read messages from file and send them.
+
+    } else {
+        
+        printf("This is node %d.\n", this.own_address);
+        // I'm _not_ Node 1, I should listen for incoming packages, and forward them.
+
+    }
+
+    
+
+
     free(this.connections);
+
 }
+
+
+
+
+
+int read_file(char* file_name) {
+    FILE *fd;
+    char *buf;
+    
+    struct packet* p;
+   
+    char *message;
+    int destination_address;
+    fd = fopen(file_name, "r");
+    buf = (char *)malloc(2048);
+
+
+    
+    if (fd == NULL) {
+        perror("read_file(): fopen failed");
+        return -1;
+    }
+
+    while (fgets(buf, 1024, fd) != NULL) {
+        destination_address = strtol(buf, &message, 10);
+        printf("\n\n\n");        
+        message[strlen(message)-1] = '\0';
+        printf("message: '%s' (%zu)\n", message, strlen(message));
+
+        p = create_packet(destination_address, this.own_address, message, strlen(message));
+        serialize_packet(p, strlen(message));
+        printf("\n\n\n");
+    } 
+    
+
+    return 0;
+}
+
 
 int create_test_hops(struct Node* node) {
     int addr;
