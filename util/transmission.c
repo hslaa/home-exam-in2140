@@ -8,13 +8,14 @@
 #include "../core/types/networktypes.h"
 #include "print_lib.h"
 
-int deserialize_packet(unsigned char *buf, int message_length);
 
+
+struct packet* deserialize_packet(unsigned char *buf); 
 
 
 struct packet* create_packet(uint16_t destination_address, uint16_t source_address, unsigned char* message, int message_length) {
     struct packet* p;
-    uint16_t packet_length = sizeof(destination_address) + sizeof(source_address) + message_length;
+    uint16_t packet_length = sizeof(uint16_t)*3 + message_length;
     p = malloc(sizeof(struct packet));
     /* 
     printf("Creating packet with:\n");
@@ -36,7 +37,7 @@ struct packet* create_packet(uint16_t destination_address, uint16_t source_addre
     return p;
 }
 
-int serialize_packet(struct packet* p, int message_length) {
+unsigned char* serialize_packet(struct packet* p, int message_length) {
     unsigned char *buf;
     
     buf = malloc(sizeof(struct packet));
@@ -46,27 +47,36 @@ int serialize_packet(struct packet* p, int message_length) {
     memcpy(&(buf[4]), &(p->source_address), sizeof(uint16_t));     
     memcpy(&(buf[6]), p->message, message_length + 1);
     //printf("[SERIALIZE_PACKET] trying to memcpy message %s (%d)into buf[6]\n", p->message, message_length);
-    deserialize_packet(buf, message_length);
-    
+    deserialize_packet(buf);
     print_pkt(buf);
-    return 0;
+    //free(p);
+    
+    return buf;
 }
 
-int deserialize_packet(unsigned char *buf, int message_length) {
+struct packet* deserialize_packet(unsigned char *buf) {
     struct packet* p;
+    int message_length;
     p = (struct packet*)malloc(sizeof(struct packet));
 
     memcpy(&p->packet_length, &(buf[0]), sizeof(uint16_t)); 
     memcpy(&p->destination_address, &(buf[2]), sizeof(uint16_t));
     memcpy(&p->source_address, &(buf[4]), sizeof(uint16_t));
-    memcpy(p->message, &(buf[6]), message_length + 1);
+    
+
+    // Magic number 5 comes from 3*2 - 1 for the \0-byte
+    message_length = ntohs(p->packet_length) - 5;
+    
+    memcpy(p->message, &(buf[6]), message_length);
     printf("Deserialized packet:\n");
     printf("\tpacket_length: %d\n", ntohs(p->packet_length));
     printf("\tdestination_address: %d\n", ntohs(p->destination_address));
     printf("\tsource_address: %d\n", ntohs(p->source_address));   
     printf("\tmessage: %s\n", p->message); 
+   
+   
     
-    return 0;
+    return p; 
         
 
 }
