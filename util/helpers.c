@@ -136,7 +136,11 @@ int free_routing_table(struct Node node) {
     for (i = 0; i < size; i++) {
         free(node.rt->hops[i]);
     }
-    free(node.rt->hops);
+    
+    if (size > 0) {
+        free(node.rt->hops);
+    }
+    
     free(node.rt);
     return 0;
 }
