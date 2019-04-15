@@ -14,7 +14,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
-
+#include "../util/print_lib.h"
 #include "../util/logger.h"
 #include "types/networktypes.h"
 #include "../util/helpers.h"
@@ -116,39 +116,33 @@ int main(int argc, char *argv[]) {
 }
 
 int handle_packet(unsigned char *packet) {
+    struct packet* p; 
 
+    
     printf("Node received: %s\n", packet);
      
-    struct packet* p;
+    
 
     p = deserialize_packet(packet);
-    
+
+
     printf("received packet with destination %d\n", p->destination_address); 
 
 
-    if (ntohs(p->destination_address) == this.own_address) {
+    if (p->destination_address == this.own_address) {
         printf("Received packet for ME!!\n");       
-        
-        printf("'%s' == ' QUIT' ?\n", (char*)p->message);
-        
+        print_received_pkt(this.own_address, packet);
+        printf("'%s' == ' QUIT' ?\n", (char*)p->message);        
         if (!strcmp((char*) p->message, " QUIT")) {
-                printf("I was instructed by package to exit\n");
+            printf("I was instructed by package to exit\n");
+            exit(EXIT_SUCCESS);
         }
+
     } else {
-        printf("The package wasn't for me, I should forward it.+n");
+        printf("The package wasn't for me, I should forward it.\n");
+        print_forwarded_pkt(this.own_address, packet);
         send_packet(p->destination_address, packet, p->packet_length);
     }     
-
-  
-    
-    //
-    //  if PACKET WAS FOR ME:
-    //      PRINT_RECEIVEDP_PKT(:::)
-    //      IF MESSAGE == "QUIT":
-    //          QUIT THE WHOLE NODE
-    //  else:
-    //      PRINT_FORWARDED_PK(:::)
-    //      FORWARD_PACKET()   
 
     return 0;
 }
@@ -191,6 +185,7 @@ int get_next_hop(int destination) {
     printf("searching for next_hop: \n");
     for (i = 0; i < size; i++) {
         printf("<%d:%d>?", this.rt->hops[i]->destination, this.rt->hops[i]->next_hop);
+        printf("'%d' == '%d'?\n", this.rt->hops[i]->destination, destination);
         if (this.rt->hops[i]->destination == destination) {
             printf(" YES!\n");
             return this.rt->hops[i]->next_hop;
