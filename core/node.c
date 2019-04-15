@@ -85,51 +85,33 @@ int main(int argc, char *argv[]) {
         
         recv_socket = create_receiving_socket(base_port, this.own_address);
         
-        struct sockaddr_in recvaddr;
-        memset(&recvaddr, 0, sizeof(recvaddr));
 
         if (recv_socket == -1) {
             perror("had some trouble opening socket");
-            exit(EXIT_FAILURE);
+            exit(-1);
         }  
 
         process_file("messages_1.txt");
         // I am Node 1, I should read messages from file and send them.
 
     } else {
-        
-        printf("This is node %d.\n", this.own_address);
-        // I'm _not_ Node 1, I should listen for incoming packages, and forward them.
-        
-        
-
         recv_socket = create_receiving_socket(base_port, this.own_address);
-    
-        struct sockaddr_in recvaddr;
-        memset(&recvaddr, 0, sizeof(recvaddr));
-        
+ 
         if (recv_socket == -1) {
-            exit(EXIT_FAILURE);
+            exit(-1);
         }
-        
-        int status;
 
-        status = 1;
-        while(status) {
+        while(1) {
             
-            recv_size = recvfrom(recv_socket, (char *)packet, 
-                                    2048, MSG_WAITALL, 
-                                        NULL, NULL);
+            recv_size = recv(recv_socket, (char *)packet, 2048, MSG_WAITALL);
             packet[recv_size] = '\0';
             
-            status = handle_packet(packet);
-
-            //printf("Node received: %s\n", packet);
-            
+            if (handle_packet(packet) == -1) {
+                break;
+            } 
         } 
     }
 
-    //free(this.rt);
 
     free_routing_table(this);
 
@@ -141,12 +123,8 @@ int receive_packet(int fdsock) {
     int recv_size;
     unsigned char packet[2048];
 
-    
-    
-
     recv_size = recv(fdsock, (char *)packet, 2048, 0);
          
-
     printf("Received size was %d\n", recv_size);
 
     if (recv_size > 0) {
@@ -160,36 +138,30 @@ int receive_packet(int fdsock) {
     }
     return -1;
 }
-int handle_packet(unsigned char *packet) {
-    struct packet* p; 
 
-    
+int handle_packet(unsigned char* packet) {
+    struct packet* p; 
     //printf("Node received: %s\n", packet);
      
     p = deserialize_packet(packet);
 
-
-    //printf("received packet with destination %d\n", p->destination_address); 
-
+    printf("received packet with destination %d\n", p->destination_address); 
 
     if (p->destination_address == this.own_address) {
-        //printf("Received packet for ME!!\n");       
         print_received_pkt(this.own_address, packet);
-        //printf("'%s' == ' QUIT' ?\n", (char*)p->message);        
-        if (!strcmp((char*) p->message, " QUIT")) {
-            //printf("I was instructed by package to exit\n");
-            free(p);
+        
+        if (!strcmp((char*) p->message, " QUIT")) { 
             return -1; 
         }
 
     } else {
-        //printf("The package wasn't for me, I should forward it.\n");
+
         print_forwarded_pkt(this.own_address, packet);
         send_packet(p->destination_address, packet, p->packet_length);
     }     
     free(p);
     
-    return 1;
+    return 0;
 }
 
 int send_packet(int destination_address, unsigned char* packet, int length) {
@@ -213,11 +185,11 @@ int send_packet(int destination_address, unsigned char* packet, int length) {
     //destaddr.sin_addr.s_addr = INADDR_ANY; /* remove this maybe???? since wil not recv*/
     
     //sendto(sockfd, packet, length, MSG_CONFIRM, NULL, len);
-    //printf("Sending packet with length %d (pointer: %p) to localhost:%d on socketfd %d\n",
-    //        length, packet, port, sockfd); 
+    printf("Sending packet with length %d (pointer: %p) to localhost:%d on socketfd %d\n",
+            length, packet, port, sockfd); 
     
     sendto(sockfd, packet, length, MSG_CONFIRM, (const struct sockaddr *) &destaddr, sizeof(destaddr)); 
-    //printf("sent packet....\n\n\n\n");
+    printf("sent packet....\n\n\n\n");
     close(sockfd);
    
     return 0;    
@@ -228,15 +200,16 @@ int get_next_hop(int destination) {
     int size;
 
     size = this.rt->size_of_rt;
-    //printf("searching for next_hop: \n");
+    printf("searching for next_hop: \n");
     for (i = 0; i < size; i++) {
-        //printf("<%d:%d>?", this.rt->hops[i]->destination, this.rt->hops[i]->next_hop);
-        //printf("'%d' == '%d'?\n", this.rt->hops[i]->destination, destination);
+        printf("<%d:%d>?", this.rt->hops[i]->destination, this.rt->hops[i]->next_hop);
+        printf("'%d' == '%d'?\n", this.rt->hops[i]->destination, destination);
         if (this.rt->hops[i]->destination == destination) {
-            //printf(" YES!\n");
+            printf(" YES!\n");
+            printf("returning %d as next hop\n", this.rt->hops[i]->next_hop);
             return this.rt->hops[i]->next_hop;
         }
-        //printf(" NO!\n");
+        printf(" NO!\n");
     }
     printf("Couldnt find any hop :(\n");
     return -1;
@@ -272,7 +245,8 @@ int create_receiving_socket(int base_port, int own_address) {
     printf("Attempting to bind port %d\n", port);
     if (bind(sockfd, (const struct sockaddr *)&nodeaddr, sizeof(nodeaddr)) < 0) {
         perror("Bind failed");
-        return -1;
+        exit(-1);
+        //return -1;
     }
     
     if (own_address == 1) {
@@ -315,11 +289,12 @@ int process_file(char* file_name) {
         p = create_packet(destination_address, this.own_address, message, strlen(message));
         sendbuf = serialize_packet(p, strlen(message));
         
+        print_pkt(sendbuf);      
         send_packet(destination_address, sendbuf, ntohs(p->packet_length));
         
        
         receive_packet(recv_socket);
-        free(p);
+        //free(p);
         printf("\n\n\n");
     } 
      
