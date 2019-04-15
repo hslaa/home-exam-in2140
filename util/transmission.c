@@ -63,15 +63,18 @@ struct packet* deserialize_packet(unsigned char *buf) {
     memcpy(&p->destination_address, &(buf[2]), sizeof(uint16_t));
     memcpy(&p->source_address, &(buf[4]), sizeof(uint16_t));
     
+    p->packet_length = ntohs(p->packet_length); 
+    p->destination_address = ntohs(p->destination_address); 
+    p->source_address = ntohs(p->source_address); 
 
     // Magic number 5 comes from 3*2 - 1 for the \0-byte
-    message_length = ntohs(p->packet_length) - 5;
+    message_length = p->packet_length - 5;
     
     memcpy(p->message, &(buf[6]), message_length);
     printf("Deserialized packet:\n");
-    printf("\tpacket_length: %d\n", ntohs(p->packet_length));
-    printf("\tdestination_address: %d\n", ntohs(p->destination_address));
-    printf("\tsource_address: %d\n", ntohs(p->source_address));   
+    printf("\tpacket_length: %d\n", p->packet_length);
+    printf("\tdestination_address: %d\n", p->destination_address);
+    printf("\tsource_address: %d\n", p->source_address);   
     printf("\tmessage: %s\n", p->message); 
    
    
