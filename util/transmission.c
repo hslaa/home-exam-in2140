@@ -47,9 +47,9 @@ unsigned char* serialize_packet(struct packet* p, int message_length) {
     memcpy(&(buf[4]), &(p->source_address), sizeof(uint16_t));     
     memcpy(&(buf[6]), p->message, message_length + 1);
     //printf("[SERIALIZE_PACKET] trying to memcpy message %s (%d)into buf[6]\n", p->message, message_length);
-    deserialize_packet(buf);
-    print_pkt(buf);
-    //free(p);
+     
+    //print_pkt(buf);
+    
     
     return buf;
 }
@@ -71,12 +71,13 @@ struct packet* deserialize_packet(unsigned char *buf) {
     message_length = p->packet_length - 5;
     
     memcpy(p->message, &(buf[6]), message_length);
+    /*
     printf("Deserialized packet:\n");
     printf("\tpacket_length: %d\n", p->packet_length);
     printf("\tdestination_address: %d\n", p->destination_address);
     printf("\tsource_address: %d\n", p->source_address);   
     printf("\tmessage: %s\n", p->message); 
-   
+    */
    
     
     return p; 
