@@ -82,7 +82,20 @@ void free_nodes(struct Node *n, int number_of_nodes) {
     free(n);
 }
 
+void free_node(struct Node* n) {
+    int i;
 
+    for (i = 0; i < n->number_of_connections; i++) {
+        free(&(n->connections[i]));
+    }
+
+    if (n->number_of_connections > 1) {
+            free(n->connections);
+    }
+
+    free(n);
+
+}
 
 int initialize_routing_table(struct Node* n, int size) { 
     n->rt = malloc( sizeof ( struct routing_table ) );

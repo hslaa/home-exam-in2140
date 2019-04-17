@@ -14,19 +14,24 @@
 #include "../util/helpers.h"
 #include "q.h"
 
-void sssp(struct Node *n, struct Node source, int size);
-void generate_routing_tables(void);
+void sssp(struct Node *n, int size);
+void generate_routing_tables(struct Node* n, int size);
 
 
-void sssp(struct Node *n, struct Node source, int size) {
+void sssp(struct Node *n, int size) {
     struct Node** q;
     struct Node* u;
     struct Node* d;
+    struct Node* source;
     struct Connection c;
   
     int alt;
     int i;
     int j;
+
+  
+
+
     //  Initialize a priority queue Q.
     //  Q sorts based on node.distance
     q = initialize_queue(n, size);        
@@ -40,14 +45,12 @@ void sssp(struct Node *n, struct Node source, int size) {
     }
     
     
-    
-    //  source.distance = 0;
-    n[0].distance = 0;
+    source = get_pointer_to_node(1, size, n);
 
-    // Does this remove the unused parameter warning?
-    if (source.distance == 0) {
-        
-    }
+    //  source.distance = 0;
+    source->distance = 0;
+
+   
     
     //  while Q is not empty:
 
@@ -64,8 +67,10 @@ void sssp(struct Node *n, struct Node source, int size) {
             if (alt < d->distance) {
                 printf(" (TRUE)\n");
                 printf("Setting distance to: %d\n", alt);
+    
                 d->distance = alt;
                 d->previous = u; 
+            
             } else {
                 printf(" (FALSE)\n");
             }
@@ -80,5 +85,19 @@ void sssp(struct Node *n, struct Node source, int size) {
 
 
 
-void generate_routing_tables(void) {
+void generate_routing_tables(struct Node* n, int size) {
+    int i, destination;
+    struct Node* tmp_node;
+    initialize_routing_tables(n, size);
+    
+
+    for(i = 0; i < size; i++) {
+        tmp_node = &n[i];
+        destination = n[i].own_address;
+        while (tmp_node->previous != NULL) {
+            printf("Inserting hop into %d\n", i);
+            insert_hop_in_routing_table(tmp_node->previous, destination, tmp_node->own_address);
+            tmp_node = tmp_node->previous;
+        } 
+    }
 }

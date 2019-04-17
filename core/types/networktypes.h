@@ -55,5 +55,10 @@ typedef struct packet {
     unsigned char message[2048]; 
 } packet;
 
+typedef struct node_socket {
+    int own_address;
+    int sockfd;
+} node_socket;
+
 
 #endif

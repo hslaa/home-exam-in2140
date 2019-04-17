@@ -6,7 +6,16 @@
  */ 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <math.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+
 
 #include "../util/sssp.h"
 #include "../util/logger.h"
@@ -14,19 +23,45 @@
 #include "../util/print_lib.h"
 #include "types/networktypes.h"
 #include "../util/helpers.h"
+#include "network.h"
+#include "protocol.h"
+
 
 struct Node* create_test_nodes();
-int test_sssp(struct Node *n, struct Node source, int size);
+int test_sssp(struct Node *n, int size);
 
+int insert_in_sockets(int own_address, int socket, int number_of_sockets, struct node_socket* ns); 
 int free_routing_tables(struct Node *n, int size);
 int test_routing_tables(struct Node* node); 
 int create_routing_tables(struct Node *n, int size); 
 int is_node_on_shortest_path(struct Node* destination, struct Node* intermediate);
+int print_routing_tables(struct Node* n, int size);
+int create_socket(int base_port, int number_of_nodes);
+struct Node* receive_nodes(int sockfd, int number_of_nodes);
+int send_routing_tables(struct Node* n, int size); 
 
-int main() {
 
+// remembers which node listens on which sockets
+struct node_socket* sockets;
+
+
+
+int main(int argc, char *argv[]) {
+    int sockfd;
+    int base_port;
+    int num_nodes;
+
+    if (argc < 3) {
+        printf("usage: ./routing_server <base port> <number of nodes>\n");
+        exit(EXIT_FAILURE);
+    }
+    
     logger("DEBUG", "Starting routing_server");
     
+    base_port = atoi(argv[1]);
+    num_nodes = atoi(argv[2]);
+
+    /* 
     struct Node *testnodes = malloc(sizeof(struct Node) * 8);
     testnodes = create_test_nodes(8);
     
@@ -38,24 +73,136 @@ int main() {
     print_node(testnodes[5]);
     print_node(testnodes[6]);
     print_node(testnodes[7]);
+    */
+
+    
+    sockfd = create_server_socket(base_port, num_nodes);
+
+    if (sockfd < 0) {
+        exit(EXIT_FAILURE);
+    }
+    
+    //create_routing_tables(testnodes, 8);
+    //test_routing_tables(&testnodes[6]);
+    
+    
+    struct Node* nodes = receive_nodes(sockfd, num_nodes);   
+    
+    test_sssp(nodes, num_nodes);  
+
+    unsigned char* packet_buffer;
+    packet_buffer = (unsigned char*) malloc(1024);
+
+    
+    generate_routing_tables(nodes, num_nodes);
+   
+
+    print_routing_tables(nodes, num_nodes);
+
+    serialize_routing_table(packet_buffer, nodes[2].rt); 
+    
+    send_routing_tables(nodes, num_nodes);
+
+
+    struct routing_table* rt;
+    rt = (struct routing_table*) malloc(1024);
+    
+    
+    close(sockfd);
+    
     
 
-    test_sssp(testnodes, testnodes[0], 8);
-    
-    create_routing_tables(testnodes, 8);
-    test_routing_tables(&testnodes[6]);
-    free_routing_tables(testnodes, 8);
-    free_nodes(testnodes, 8); 
+    //free_routing_tables(testnodes, 8);
+    //free_nodes(testnodes, 8); 
 
     return 0;
 }
 
-int test_sssp(struct Node *n, struct Node source, int size) {
+
+int print_routing_tables(struct Node* n, int size) {
+    int i;
+    
+    printf("Generated routing tables:\n");
+   
+    
+    for (i = 0; i < size; i++) {
+        printf("=== Node %d ===\n", n[i].own_address);
+        printf("\t rt_size: %d\n", n[i].rt->size_of_rt);
+    }
+    return 0;
+
+}
+
+int send_routing_tables(struct Node* n, int size) {
+    int i, length;
+    unsigned char* packet_buf;
+    for (i = 0; i < size; i++) {
+
+        packet_buf = (unsigned char*) malloc(1024);
+        length = serialize_routing_table(packet_buf, n[i].rt);        
+
+        printf("sending routing table to %d on socket %d\n", 
+                sockets[i].own_address,
+                sockets[i].sockfd);
+        
+        send_node(sockets[i].sockfd, packet_buf, length);
+
+    }        
+
+    return 0;
+}
+
+
+// this should eventally return struct Node**
+struct Node* receive_nodes(int sockfd, int number_of_nodes) {
+    int nodes_received, node_socket;
+    
+    unsigned char* testbuf;
+    struct sockaddr_storage nodeaddr;
+    socklen_t addr_len;
+
+    nodes_received = 0;
+     
+    struct Node *nodes = malloc(sizeof(struct Node) * number_of_nodes);
+    sockets = malloc(sizeof(struct node_socket) * number_of_nodes);
+    
+
+    
+
+    while (nodes_received < number_of_nodes) {
+        addr_len = sizeof(nodeaddr);
+        node_socket = accept(sockfd, (struct sockaddr *)&nodeaddr, &addr_len);
+                
+        testbuf = receive_node(node_socket);
+        deserialize_node(&nodes[nodes_received],testbuf);
+        insert_in_sockets(nodes[nodes_received].own_address, node_socket, nodes_received, sockets);
+        printf("Added new node to nodes\n"); 
+        nodes_received += 1;
+
+        printf("finished processing node %d out of %d\n", nodes_received, number_of_nodes);
+    }
+
+    int i; 
+
+    for (i = 0; i < nodes_received; i++) {
+        printf("node %d waits on socket %d\n", sockets[i].own_address, sockets[i].sockfd);
+    } 
+    return nodes;
+} 
+
+int insert_in_sockets(int own_address, int socket, int number_of_sockets, struct node_socket* ns) {
+    ns[number_of_sockets].own_address = own_address;
+    ns[number_of_sockets].sockfd = socket;
+    number_of_sockets += 1; 
+    return number_of_sockets;
+}
+
+int test_sssp(struct Node *n, int size) {
     int i;  
     int j;
     int pathlen;
     struct Node* tmpNode;
-    sssp(n, source, size);
+    sssp(n, size);
     
     printf("==== test_sssp() ====\n");
     
@@ -84,95 +231,6 @@ int test_sssp(struct Node *n, struct Node source, int size) {
     return 0;
 }
 
-/*
-int initialize_routing_table(struct Node *n, int size) {
-    int i;
-    printf("starting initialize_routing_table with size %d\n", size);
-    for (i = 0; i < size; i++) {    
-        n[i].rt = malloc( sizeof ( struct routing_table ) );
-        n[i].rt->hops = malloc( sizeof( struct hop** ) * size );
-        n[i].rt->size_of_rt = 0;
-    }
-    return 0;
-}
-
-int insert_hop_in_routing_table(struct Node* node, int dst, int n_hop) {
-    int size = node->rt->size_of_rt;
-    
-    node->rt->hops[size] = malloc(sizeof(struct hop*)); 
-    
-    node->rt->hops[size]->destination = dst;
-    node->rt->hops[size]->next_hop = n_hop;
-    
-    printf("Finished adding hop <%d:%d> to node %d\n", 
-            node->rt->hops[size]->destination,
-            node->rt->hops[size]->next_hop,
-            node->own_address
-          );
-    node->rt->size_of_rt += 1;
-    
-
-
-    return 0;
-}
-
-int free_routing_tables(struct Node *n, int size) {
-    int i;
-    int j;
-    for (i = 0; i < size; i++) {
-        printf("i = %d\n", i); 
-        for (j = 0; j < n[i].rt->size_of_rt; j++) {
-            printf("freeing n[%d].rt->hops[%d]\n", i, j);
-            free(n[i].rt->hops[j]);
-        }
-        free(n[i].rt->hops);
-        free(n[i].rt);
-    }
-
-    return 0;
-}
-
-int test_routing_tables(struct Node* node) {
-    int i;
-    struct hop* h;
-    for (i = 0; i < node->rt->size_of_rt; i++) {
-        h = node->rt->hops[i];
-        printf("=== HOP ===\n");
-        printf("to %d: jump to %d)\n", h->destination, h->next_hop);
-        printf("===========\n\n");
-    }
-
-    return 0;
-}
-
-int create_routing_tables(struct Node *n, int size) {
-    int i;
-    struct Node* tmp_node;
-    initialize_routing_table(n, size);
-    for (i = 0; i < size; i++) {
-        //  
-        //  For hver node
-        //  Malloc plass
-        //  tmpNode = node
-        //  while (tmpNode != NULL) 
-        //      sett på tmpNode->previous:  <NODE.own_address, NODE.own_address)
-       
-        //
-      
-        
-
-        tmp_node = &n[i]; 
-        while (tmp_node->previous != NULL) {            
-            insert_hop_in_routing_table(tmp_node->previous, n[i].own_address, tmp_node->own_address); 
-            tmp_node = tmp_node->previous;
-
-        } 
-         
-    }
-    
-    return 0;
-}
-*/
 int is_node_on_shortest_path(struct Node* destination, struct Node* intermediate) {
     int hit_intermediate = 0;
     int pathlen = destination->distance;

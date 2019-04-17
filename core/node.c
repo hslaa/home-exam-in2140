@@ -15,15 +15,16 @@
 #include <netinet/in.h>
 #include <fcntl.h>
 
- #include <sys/time.h>
- #include <sys/types.h>
- #include <unistd.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 
-
+#include "types/networktypes.h"
+#include "protocol.h"
+#include "network.h"
 #include "../util/print_lib.h"
 #include "../util/logger.h"
-#include "types/networktypes.h"
 #include "../util/helpers.h"
 #include "../util/transmission.h"
 
@@ -72,13 +73,34 @@ int main(int argc, char *argv[]) {
         printf("\t %s \n", argv[i]);
         parse_connection(&this, argv[i]);
     } 
+   
+    unsigned char* this_buf;
+    int size_of_buf;
+    this_buf = (unsigned char*) malloc(2048);
+    size_of_buf = serialize_node(this_buf, &this);
     
-    printf("Calling function create_test_hops() from main()\n");
-    create_test_hops(&this);
+    int nodesocket = create_node_socket(base_port);
     
-    test_routing_tables(&this);
+    
 
+    send_node(nodesocket, this_buf, size_of_buf);
+    
+    
+    this_buf = receive_node(nodesocket);
+    
+    struct routing_table* rt = (routing_table*) malloc(sizeof(rt)); 
+    
+    initialize_routing_table(&this, 10); 
+    deserialize_routing_table(this_buf, rt, &this); 
+    
+    
 
+    //create_test_hops(&this);
+    
+    //test_routing_tables(&this);
+    
+   
+    
     if (this.own_address == 1) {
         
         printf("This is node 1.\n");
@@ -91,8 +113,8 @@ int main(int argc, char *argv[]) {
             exit(-1);
         }  
 
-        process_file("messages_1.txt");
-        // I am Node 1, I should read messages from file and send them.
+        process_file("data.txt");
+       
 
     } else {
         recv_socket = create_receiving_socket(base_port, this.own_address);
