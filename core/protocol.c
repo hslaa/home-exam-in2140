@@ -59,7 +59,7 @@ int serialize_node(unsigned char* packet_buf, struct Node* n) {
     /* making sure to set a null byte after the last character we copied to data_buf */
     connections[total_bytes] = '\0';
 
-    length = total_bytes + 1;
+    length = ( sizeof(uint16_t) *3 ) + total_bytes + 1;
     own_address = n->own_address;
     number_of_connections = n->number_of_connections;
      
@@ -154,21 +154,19 @@ int deserialize_routing_table(unsigned char* packet_buf, struct routing_table* r
 }
 
 struct Node* deserialize_node(struct Node* n, unsigned char* packet_buf) {
-    //struct Node* n;
     unsigned char* data;
-    uint16_t length;
+    uint16_t length, data_length;
     int i;
-    
-    //n = (struct Node*) malloc(sizeof(struct Node));
-    
+     
     length = *((uint16_t *) &packet_buf[0]); 
     n->own_address =  *((uint16_t *) &packet_buf[2]); 
     n->number_of_connections =  *((uint16_t *) &packet_buf[4]); 
     
     printf("length: %d\n", length);  
     
+    data_length = length - ( 3 * sizeof(uint16_t) );   
    
-    data = (unsigned char*) malloc(length + 1);
+    data = (unsigned char*) malloc(data_length);
     strcpy((char*) data, (char*) &(packet_buf[6]));
 
 
@@ -178,7 +176,7 @@ struct Node* deserialize_node(struct Node* n, unsigned char* packet_buf) {
     printf("\t number_of_connections: %d\n", n->number_of_connections);
     printf("\t non-parsed connections: %s\n", data); 
     
-    //n->connections = (struct Connection*) malloc(sizeof(struct Connection) * n->number_of_connections);
+
 
     n->connections = parse_connections(data, n->number_of_connections);
     
@@ -308,63 +306,3 @@ struct Connection* parse_connections(unsigned char* data, int number_of_connecti
     return connections; 
     
 }
-
-
-/*
-struct node_packet* create_node_packet(struct Node* n) {
-    struct node_packet* np;
-    unsigned char* data_buf;
-    unsigned char* tmp_buf; 
-
-    int i, d, w;
-    int total_bytes;
-    int bytes_written;
-
-    np = (struct node_packet*) malloc(sizeof(n));
-
-    data_buf = (unsigned char*) malloc(1024);
-
-    tmp_buf = (unsigned char*) malloc(1024); 
-
-
-    bytes_written = 0;
-    total_bytes = 0;
-    
-    // Connections are written into a buffer in the format
-    // destination:weight;destination:weight;
-    for (i = 0; i < n->number_of_connections; i++) { 
-        
-        d = n->connections[i].destination;
-        w = n->connections[i].weight;
-        
-        bytes_written = sprintf(tmp_buf, "%d:%d;", d, w);
-        
-        memcpy(data_buf + total_bytes , tmp_buf, bytes_written);
-        
-        total_bytes += bytes_written;
-    }
-
-    data_buf[total_bytes] = '\0';
-    
-    np->own_address = n->own_address;
-    np->length_of_data = total_bytes;
-    
-    np->data = (char *) malloc(strlen(data_buf) + 1);
-    strcpy(np->data, data_buf);
-}
-*/
-/*
-struct node_packet* deserialize_node_packet(unsigned char* buf) {
-    struct node_packet* np;
-    int length_of_data;
-
-    np = (struct node_packet*) malloc(sizeof(buf));
-
-    memcpy(&np->own_address, &(buf[0]), sizeof(uint16_t));
-    memcpy(&np->length_of_data, &(buf[2]), sizeof(uint16_t));
-
-    return np;
-
-}
-
-*/
