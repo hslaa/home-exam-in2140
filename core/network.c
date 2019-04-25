@@ -31,6 +31,8 @@ unsigned char* receive_node(int nodesocket) {
     int len_bytes; 
     unsigned char* node_buf;
     
+    int num_bytes, offset, total_received, remaining_recv;
+
     // first receive the length
     recv(nodesocket, &len_bytes, sizeof(int), 0);
     
@@ -39,7 +41,21 @@ unsigned char* receive_node(int nodesocket) {
     node_buf = (unsigned char*) malloc(len_bytes + 1);
     
     // and then receive the whole buffer
-    recv(nodesocket, node_buf, len_bytes+1, 0);
+    
+    
+    num_bytes = 0;
+    offset = 0;
+    total_received = 0;
+    remaining_recv = len_bytes;
+    
+    
+    do {
+        printf("TRYING TO RECEIVE, %d BYTES TO GO\n", remaining_recv);
+        num_bytes = recv(nodesocket, node_buf + offset, remaining_recv, 0); // (remaining_recv +1) ?
+        total_received += num_bytes;
+        offset += num_bytes;
+        remaining_recv -= num_bytes;
+    } while (total_received != len_bytes);
     
     return node_buf;
 }
