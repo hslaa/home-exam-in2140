@@ -49,9 +49,6 @@ int main(int argc, char *argv[]) {
 
     int recv_size;
     
-    
-
-
     logger("DEBUG", "Node starting");
 
     printf("Node starting with %d arguments\n", argc);
@@ -63,6 +60,14 @@ int main(int argc, char *argv[]) {
     this.own_address = atoi(argv[2]);
     base_port = atoi(argv[1]);  
 
+    
+    int nodesocket = create_node_socket(base_port);
+    
+    if (nodesocket < 0) { 
+        exit(-2);
+    }
+    
+    
     initialize_node_connections(&this, number_of_connections); 
     
 
@@ -79,12 +84,6 @@ int main(int argc, char *argv[]) {
     this_buf =  malloc(2048);
     
     size_of_buf = serialize_node(this_buf, &this);
-    
-    int nodesocket = create_node_socket(base_port);
-    
-    if (nodesocket < 0) { 
-        exit(-2);
-    }
 
     send_node(nodesocket, this_buf, size_of_buf);
     
