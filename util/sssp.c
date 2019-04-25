@@ -95,9 +95,15 @@ void generate_routing_tables(struct Node* n, int size) {
         tmp_node = &n[i];
         destination = n[i].own_address;
         while (tmp_node->previous != NULL) {
-            printf("Inserting hop into %d\n", i);
+            printf("Inserting hop into %d\n", i); 
             insert_hop_in_routing_table(tmp_node->previous, destination, tmp_node->own_address);
             tmp_node = tmp_node->previous;
         } 
     }
+    
+    tmp_node = get_pointer_to_node(1, size, n);
+    
+
+    // A hacky way to make sure that Node 1 receives messages for itself.
+    insert_hop_in_routing_table(tmp_node, 1, 1);
 }

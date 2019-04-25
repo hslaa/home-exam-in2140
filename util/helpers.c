@@ -17,6 +17,9 @@
 
 #include "../core/types/networktypes.h"
 
+
+
+
 int get_index_of_node(int own_address, int size_of_array, struct Node *node_array) {
     int i = 0;
     
@@ -35,7 +38,7 @@ int get_index_of_node(int own_address, int size_of_array, struct Node *node_arra
 
 int initialize_node_connections(struct Node* node, int number_of_connections) { 
     node->number_of_connections = 0;
-    node->connections = malloc(sizeof(struct Connection) * number_of_connections);
+    node->connections = (struct Connection*) malloc(sizeof(struct Connection) * number_of_connections);
     
     return 0;
 }
@@ -68,20 +71,25 @@ struct Node* get_pointer_to_node(int own_address, int size_of_array, struct Node
 
 
 void free_connections(struct Node n) {
-    printf("Deleting connections on node %d\n", n.own_address);
-    free(n.connections);
 
+
+    printf("Deleting connections on node %d\n", n.own_address);
+    if (n.number_of_connections > 1) {
+            free(n.connections);
+    }
 }
 
-void free_nodes(struct Node *n, int number_of_nodes) {
-    int i;
-
+int free_nodes(struct Node* n, int number_of_nodes) {
+    int i, k;
+    int j;
     for (i = 0; i < number_of_nodes; i++) {
         free_connections(n[i]);
-    }
+        free_routing_table(n[i]);      
+    } 
     free(n);
-}
 
+    return 0;
+}
 void free_node(struct Node* n) {
     int i;
 
@@ -92,10 +100,22 @@ void free_node(struct Node* n) {
     if (n->number_of_connections > 1) {
             free(n->connections);
     }
-
+    
     free(n);
 
 }
+
+/*
+void free_nodes(struct Node *n, int number_of_nodes) {
+    int i;
+
+    for (i = 0; i < number_of_nodes; i++) {
+        free_node(&n[i]);
+        //free_connections(n[i]);
+    }
+    //free(n);
+}
+*/
 
 int initialize_routing_table(struct Node* n, int size) { 
     n->rt = malloc( sizeof ( struct routing_table ) );
@@ -113,10 +133,12 @@ int initialize_routing_tables(struct Node *n, int size) {
     int i;
     printf("starting initialize_routing_tables with size %d\n", size);
     for (i = 0; i < size; i++) {    
+        initialize_routing_table(&n[i], 100);
+        /*
         n[i].rt = malloc( sizeof ( struct routing_table ) );
         n[i].rt->size_of_rt = 0;
         n[i].rt->hops = malloc( sizeof( struct hop** ) * size );
-        
+        */
     }
     return 0;
 }
@@ -150,11 +172,9 @@ int free_routing_table(struct Node node) {
         free(node.rt->hops[i]);
     }
     
-    if (size > 0) {
-        free(node.rt->hops);
-    }
-    
+    free(node.rt->hops);
     free(node.rt);
+    
     return 0;
 }
 
@@ -174,7 +194,7 @@ int free_routing_tables(struct Node *n, int size) {
     return 0;
 }
 
-
+/*
 int test_routing_tables(struct Node* node) {
     int i;
     struct hop* h;
@@ -356,4 +376,4 @@ struct Node* create_test_nodes() {
 
     return n;
 }
-    
+*/  
