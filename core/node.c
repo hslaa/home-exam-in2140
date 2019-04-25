@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
     int nodesocket = create_node_socket(base_port);
     
     if (nodesocket < 0) { 
-        exit(EXIT_FAILURE);
+        exit(-2);
     }
 
     send_node(nodesocket, this_buf, size_of_buf);
