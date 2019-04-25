@@ -102,7 +102,7 @@ int main(int argc, char *argv[]) {
     
     if (this.own_address == 1) {
         
-        printf("This is node 1.\n");
+    
         
         recv_socket = create_receiving_socket(base_port, this.own_address);
         
@@ -111,6 +111,8 @@ int main(int argc, char *argv[]) {
             perror("had some trouble opening socket");
             exit(-1);
         }  
+        
+        sleep(1);
 
         process_file("data.txt");
        
@@ -130,7 +132,8 @@ int main(int argc, char *argv[]) {
             if (handle_packet(packet) == -1) {
                 break;
             } 
-        } 
+        }
+        close(recv_socket); 
     }
 
     /* Freeing memory */
