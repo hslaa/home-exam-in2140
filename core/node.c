@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
 
     printf("Node starting with %d arguments\n", argc);
 
-    number_of_connections = argc-3;
+    number_of_connections = argc - 3;
 
    
     
@@ -76,30 +76,29 @@ int main(int argc, char *argv[]) {
    
     unsigned char* this_buf;
     int size_of_buf;
-    this_buf = (unsigned char*) malloc(2048);
+    this_buf =  malloc(2048);
+    
     size_of_buf = serialize_node(this_buf, &this);
     
     int nodesocket = create_node_socket(base_port);
     
-    
+    if (nodesocket < 0) { 
+        exit(EXIT_FAILURE);
+    }
 
     send_node(nodesocket, this_buf, size_of_buf);
     
+    free(this_buf); 
     
     this_buf = receive_node(nodesocket);
     
     struct routing_table* rt = (routing_table*) malloc(sizeof(rt)); 
     
     initialize_routing_table(&this, 10); 
+    
     deserialize_routing_table(this_buf, rt, &this); 
     
-    
-
-    //create_test_hops(&this);
-    
-    //test_routing_tables(&this);
-    
-   
+    free(this_buf); 
     
     if (this.own_address == 1) {
         
@@ -134,11 +133,16 @@ int main(int argc, char *argv[]) {
         } 
     }
 
+    /* Freeing memory */
 
-    free_routing_table(this);
-
-    free(this.connections);
+    free(rt); 
+    free_routing_table(this); 
+    free_connections(this);
+  
     printf("Quitting...\n");
+
+    return 0;
+
 }
 
 int receive_packet(int fdsock) {
@@ -164,8 +168,8 @@ int receive_packet(int fdsock) {
 int handle_packet(unsigned char* packet) {
     struct packet* p; 
     //printf("Node received: %s\n", packet);
-     
-    p = deserialize_packet(packet);
+    p = (struct packet*) malloc(sizeof(struct packet)); 
+    deserialize_packet(p, packet);
 
     printf("received packet with destination %d\n", p->destination_address); 
 
@@ -173,6 +177,7 @@ int handle_packet(unsigned char* packet) {
         print_received_pkt(this.own_address, packet);
         
         if (!strcmp((char*) p->message, " QUIT")) { 
+            free(p);
             return -1; 
         }
 
@@ -181,8 +186,9 @@ int handle_packet(unsigned char* packet) {
         print_forwarded_pkt(this.own_address, packet);
         send_packet(p->destination_address, packet, p->packet_length);
     }     
-    free(p);
     
+    free(p); 
+  
     return 0;
 }
 
@@ -213,7 +219,7 @@ int send_packet(int destination_address, unsigned char* packet, int length) {
     sendto(sockfd, packet, length, MSG_CONFIRM, (const struct sockaddr *) &destaddr, sizeof(destaddr)); 
     printf("sent packet....\n\n\n\n");
     close(sockfd);
-   
+    
     return 0;    
 }
 
@@ -267,15 +273,14 @@ int create_receiving_socket(int base_port, int own_address) {
     printf("Attempting to bind port %d\n", port);
     if (bind(sockfd, (const struct sockaddr *)&nodeaddr, sizeof(nodeaddr)) < 0) {
         perror("Bind failed");
-        exit(-1);
-        //return -1;
+        return -1;
     }
     
     if (own_address == 1) {
         printf("own_address == 1\n");
         if (fcntl(sockfd, F_SETFL, O_NONBLOCK) != 0) {
             perror("fcntl failed");
-            exit(EXIT_FAILURE);
+            return -1; 
         }
     }
    
@@ -304,7 +309,9 @@ int process_file(char* file_name) {
 
     while (fgets(buf, 1024, fd) != NULL) {
         destination_address = strtol(buf, &message, 10);
-        printf("\n\n\n");        
+        printf("\n\n\n");
+
+        // -1 getting rid of the \newline
         message[strlen(message)-1] = '\0';
         printf("message: '%s' (%zu)\n", message, strlen(message));
 
@@ -316,90 +323,15 @@ int process_file(char* file_name) {
         
        
         receive_packet(recv_socket);
-        //free(p);
+
         printf("\n\n\n");
     } 
      
     fclose(fd);
-    //free(buf);  
+
     return 0;
 }
 
-
-int create_test_hops(struct Node* node) {
-    int addr;
-    
-    addr = node->own_address;
-    
-    switch(addr) {
-        case 1: 
-            printf("Creating test hops for node %d\n", addr);
-            initialize_routing_table(node, 8);
-            insert_hop_in_routing_table(node, 1, 1);
-            insert_hop_in_routing_table(node, 11, 11);
-            insert_hop_in_routing_table(node, 19, 11);
-            insert_hop_in_routing_table(node, 103, 11);
-            insert_hop_in_routing_table(node, 13, 11); 
-            insert_hop_in_routing_table(node, 101, 11);
-            insert_hop_in_routing_table(node, 17, 11);
-            insert_hop_in_routing_table(node, 107, 11);
-            break;
-        case 11:
-            printf("Creating test hops for node %d\n", addr);
-            initialize_routing_table(node, 6);
-            insert_hop_in_routing_table(node, 19, 19);
-            insert_hop_in_routing_table(node, 103, 19);
-            insert_hop_in_routing_table(node, 13, 13);
-            insert_hop_in_routing_table(node, 101, 19); 
-            insert_hop_in_routing_table(node, 17, 19);
-            insert_hop_in_routing_table(node, 107, 19);
-            break;
-
-        case 13:
-            printf("Creating test hops for node %d\n", addr);
-            initialize_routing_table(node, 0);
-            break;
-
-        case 17:
-            printf("Creating test hops for node %d\n", addr);
-            initialize_routing_table(node, 0);
-            break;
-
-        case 19:
-            printf("Creating test hops for node %d\n", addr);
-            initialize_routing_table(node, 4);
-            insert_hop_in_routing_table(node, 103, 103);
-            insert_hop_in_routing_table(node, 101, 101);
-            insert_hop_in_routing_table(node, 17, 101);
-            insert_hop_in_routing_table(node, 107, 101);
-            break;
-
-        case 101:
-            printf("Creating test hops for node %d\n", addr);
-            initialize_routing_table(node, 2);
-            insert_hop_in_routing_table(node, 17, 107);
-            insert_hop_in_routing_table(node, 107, 107);
-            break;
-
-        case 103:
-            printf("Creating test hops for node %d\n", addr); 
-            initialize_routing_table(node, 0);
-            break;
-
-        case 107:
-            printf("Creating test hops for node %d\n", addr);
-            initialize_routing_table(node, 1);
-            insert_hop_in_routing_table(node, 17, 17);
-            break;
-        default:
-            printf("own_address %d did not match any of the cases.\n", addr);
-            exit(EXIT_FAILURE); 
-    
-    }
-        
-   
-    return 0;
-}
 
 int parse_connection(struct Node* node, char c[]) {
     int i;

@@ -5,45 +5,21 @@
 
 #include "types/networktypes.h"
 #include "../util/helpers.h"
-struct routing_table* parse_hops(unsigned char* data, int size_of_rt, struct Node* n);
+int parse_hops(unsigned char* data, int size_of_rt, struct Node* n);
 struct Connection* parse_connections(unsigned char* data, int number_of_connections); 
-unsigned char* serialize_node(unsigned char* packet_buf, struct Node* n);
+int serialize_node(unsigned char* packet_buf, struct Node* n);
 struct Node* deserialize_node(struct Node* n, unsigned char* packet_buf);
-/*
-int main() {
-    
-    struct Node test_node;
-    unsigned char* serialized_node;
-    struct Node* deserialized_node;
 
-    test_node.own_address = 11;
-    test_node.number_of_connections = 2;
-    test_node.connections = malloc(sizeof(struct Connection) * 2);
 
-    test_node.connections[0].destination = 13;
-    test_node.connections[0].weight = 7;
-
-    test_node.connections[1].destination = 19;
-    test_node.connections[1].weight = 2;
-
-    serialized_node = serialize_node(&test_node);
-    deserialized_node = deserialize_node(serialized_node);
-
-   
-    free(deserialized_node);
-    free(test_node.connections);
-     
-    return 0;
-}
-*/
-unsigned char* serialize_node(unsigned char* packet_buf, struct Node* n) {
+int serialize_node(unsigned char* packet_buf, struct Node* n) {
 
     char* tmp_buf; /* used to byte-by-byte copy output from sprintf to data_buf */ 
     int i, d, w;
    
     int bytes_written; 
     int total_bytes;
-
+    int buf_size;
+    
     /* declaring variables to be embedded in the serialized char array */
     uint16_t length;
     uint16_t own_address;
@@ -95,12 +71,15 @@ unsigned char* serialize_node(unsigned char* packet_buf, struct Node* n) {
     
     printf("Serialized node with own_address %d and connections %s\n", own_address, connections); 
     
-    //deserialize_node(packet_buf);
+    
 
     free(connections);
     free(tmp_buf);
     
-    return packet_buf;
+    buf_size = ( sizeof(uint16_t) * 3 ) + total_bytes;
+
+    printf("serialize_node: returning %d bytes as size for packet_buf\n", buf_size);
+    return buf_size;
 }
 
 
@@ -141,9 +120,10 @@ int serialize_routing_table(unsigned char* packet_buf, struct routing_table* rt)
     printf("\tlength: %d\n", length);
     printf("\tsize_of_rt: %d\n", size_of_rt);
     printf("\tnon-parse hops: %s\n", &packet_buf[4]);
-    free(hops);
-    free(tmp_buf);
     
+    free(tmp_buf);
+    free(hops);
+
     return length;
 } 
 
@@ -167,6 +147,7 @@ int deserialize_routing_table(unsigned char* packet_buf, struct routing_table* r
     
     parse_hops(data, rt->size_of_rt, n);
     
+    free(data);
     return 0; 
 
     
@@ -197,7 +178,7 @@ struct Node* deserialize_node(struct Node* n, unsigned char* packet_buf) {
     printf("\t number_of_connections: %d\n", n->number_of_connections);
     printf("\t non-parsed connections: %s\n", data); 
     
-    n->connections = (struct Connection*) malloc(sizeof(struct Connection) * n->number_of_connections);
+    //n->connections = (struct Connection*) malloc(sizeof(struct Connection) * n->number_of_connections);
 
     n->connections = parse_connections(data, n->number_of_connections);
     
@@ -207,21 +188,19 @@ struct Node* deserialize_node(struct Node* n, unsigned char* packet_buf) {
         printf("\t\t me -> %d (%d) \n", n->connections[i].destination, n->connections[i].weight);
     }
     
+    free(data); 
 
-    free(data);
-    free(packet_buf);
-     
     return n;
 
 }
 
-struct routing_table* parse_hops(unsigned char* data, int size_of_rt, struct Node* node) {
+int parse_hops(unsigned char* data, int size_of_rt, struct Node* node) {
     int i; 
-    struct routing_table* rt;
+    //struct routing_table* rt;
     char* hop_token; 
     struct hop* hops;
     
-    rt = (struct routing_table*) malloc(sizeof(struct routing_table));
+    //rt = (struct routing_table*) malloc(sizeof(struct routing_table));
 
     printf("==== Trying to parse string: '%s'\n", data);
 
@@ -269,11 +248,10 @@ struct routing_table* parse_hops(unsigned char* data, int size_of_rt, struct Nod
         insert_hop_in_routing_table(node, hops[i].destination, hops[i].next_hop);
     }
     
-  
-
     free(c_strings);
-    
-    return rt;
+    free(hops); 
+  
+    return 0;
 }
 
 struct Connection* parse_connections(unsigned char* data, int number_of_connections) {
@@ -326,27 +304,10 @@ struct Connection* parse_connections(unsigned char* data, int number_of_connecti
     }
 
     free(c_strings);
-
+    
     return connections; 
     
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 /*

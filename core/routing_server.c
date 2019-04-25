@@ -50,6 +50,7 @@ int main(int argc, char *argv[]) {
     int sockfd;
     int base_port;
     int num_nodes;
+    int i;
 
     if (argc < 3) {
         printf("usage: ./routing_server <base port> <number of nodes>\n");
@@ -60,61 +61,33 @@ int main(int argc, char *argv[]) {
     
     base_port = atoi(argv[1]);
     num_nodes = atoi(argv[2]);
-
-    /* 
-    struct Node *testnodes = malloc(sizeof(struct Node) * 8);
-    testnodes = create_test_nodes(8);
-    
-    print_node(testnodes[0]);
-    print_node(testnodes[1]); 
-    print_node(testnodes[2]);
-    print_node(testnodes[3]);
-    print_node(testnodes[4]);
-    print_node(testnodes[5]);
-    print_node(testnodes[6]);
-    print_node(testnodes[7]);
-    */
-
     
     sockfd = create_server_socket(base_port, num_nodes);
 
     if (sockfd < 0) {
         exit(EXIT_FAILURE);
     }
-    
-    //create_routing_tables(testnodes, 8);
-    //test_routing_tables(&testnodes[6]);
-    
-    
+ 
+     
     struct Node* nodes = receive_nodes(sockfd, num_nodes);   
     
     test_sssp(nodes, num_nodes);  
 
-    unsigned char* packet_buffer;
-    packet_buffer = (unsigned char*) malloc(1024);
-
     
     generate_routing_tables(nodes, num_nodes);
-   
-
-    print_routing_tables(nodes, num_nodes);
-
-    serialize_routing_table(packet_buffer, nodes[2].rt); 
-    
+     
     send_routing_tables(nodes, num_nodes);
-
-
-    struct routing_table* rt;
-    rt = (struct routing_table*) malloc(1024);
-    
     
     close(sockfd);
-    
-    
 
-    //free_routing_tables(testnodes, 8);
-    //free_nodes(testnodes, 8); 
+    for (i = 0; i < num_nodes; i++) {
+        close(sockets[i].sockfd);
+    }
 
+    free(sockets);
+    
+    printf("/// CALLING free_nodes FROM MAIN THREAD ///\n");
+    free_nodes(nodes, num_nodes);
     return 0;
 }
 
@@ -146,11 +119,12 @@ int send_routing_tables(struct Node* n, int size) {
                 sockets[i].sockfd);
         
         send_node(sockets[i].sockfd, packet_buf, length);
-
+        free(packet_buf); 
     }        
-
+    
     return 0;
 }
+
 
 
 // this should eventally return struct Node**
@@ -174,11 +148,11 @@ struct Node* receive_nodes(int sockfd, int number_of_nodes) {
         node_socket = accept(sockfd, (struct sockaddr *)&nodeaddr, &addr_len);
                 
         testbuf = receive_node(node_socket);
-        deserialize_node(&nodes[nodes_received],testbuf);
+        deserialize_node(&nodes[nodes_received], testbuf);
         insert_in_sockets(nodes[nodes_received].own_address, node_socket, nodes_received, sockets);
         printf("Added new node to nodes\n"); 
         nodes_received += 1;
-
+        free(testbuf); 
         printf("finished processing node %d out of %d\n", nodes_received, number_of_nodes);
     }
 
@@ -186,7 +160,10 @@ struct Node* receive_nodes(int sockfd, int number_of_nodes) {
 
     for (i = 0; i < nodes_received; i++) {
         printf("node %d waits on socket %d\n", sockets[i].own_address, sockets[i].sockfd);
-    } 
+    }
+    
+ 
+
     return nodes;
 } 
 

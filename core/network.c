@@ -16,11 +16,12 @@ int send_node(int fdsock, unsigned char* buf, int size_of_buf) {
     len_bytes = size_of_buf + 1;
     
     // First send the length... 
+    printf("send_node: preparing to send buf of size %d bytes\n", len_bytes);
     send(fdsock, &len_bytes, sizeof(int), 0);
     
     // then send the actual data..
     send(fdsock, buf, len_bytes, 0); 
-     
+    
     return 0; 
 
 }
@@ -34,6 +35,7 @@ unsigned char* receive_node(int nodesocket) {
     recv(nodesocket, &len_bytes, sizeof(int), 0);
     
     // then malloc space accordingly
+    printf("receive_node: mallocing %d bytes for node_bud\n", len_bytes);
     node_buf = (unsigned char*) malloc(len_bytes + 1);
     
     // and then receive the whole buffer
