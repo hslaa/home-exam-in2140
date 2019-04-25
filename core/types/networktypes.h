@@ -24,7 +24,7 @@ typedef struct Node {
     int own_address;
     int port; // do I need this?    
     int number_of_connections;
-    Connection *connections;
+    struct Connection *connections;
 
     // For SSSP
     int distance;
