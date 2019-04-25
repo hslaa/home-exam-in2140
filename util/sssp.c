@@ -30,29 +30,20 @@ void sssp(struct Node *n, int size) {
     int j;
 
   
-
-
     //  Initialize a priority queue Q.
     //  Q sorts based on node.distance
     q = initialize_queue(n, size);        
     
-    //  for each NODE in n*
-    //      n[i].distance = INF;
-    //      n[i].previous = NULL;
     for (i = 0; i < size; i++) {
         n[i].distance = 10000;
         n[i].previous = NULL;
     }
-    
-    
+     
     source = get_pointer_to_node(1, size, n);
 
     //  source.distance = 0;
     source->distance = 0;
 
-   
-    
-    //  while Q is not empty:
 
     j = 0;
     u = extract_min(q);
@@ -82,7 +73,6 @@ void sssp(struct Node *n, int size) {
     
     free_queue(q);
 }
-
 
 
 void generate_routing_tables(struct Node* n, int size) {

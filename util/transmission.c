@@ -16,23 +16,14 @@ int deserialize_packet(struct packet* p, unsigned char *buf);
 struct packet* create_packet(uint16_t destination_address, uint16_t source_address, unsigned char* message, int message_length) {
     struct packet* p;
     uint16_t packet_length = sizeof(uint16_t)*3 + message_length;
+    
     p = malloc(sizeof(struct packet));
-    /* 
-    printf("Creating packet with:\n");
-
-    printf("\t length: %d (message length: %zu)\n", packet_length, strlen(message)); 
-    printf("\t destination address: %d\n", destination_address);
-    printf("\t source address: %d\n", source_address);
-   
-    */
-    //printf("[CREATE_PACKET] message: '%s' (%d)\n", message, message_length);
+    
     p->packet_length = htons(packet_length);
     p->destination_address = htons(destination_address);
     p->source_address = htons(source_address);  
   
     memcpy(&(p->message), message, message_length+1);
-    //printf("[CREATE_PACKET] memcpy'd '%s' into packet\n", p->message);
-
 
     return p;
 }
@@ -46,10 +37,6 @@ unsigned char* serialize_packet(struct packet* p, int message_length) {
     memcpy(&(buf[2]), &(p->destination_address), sizeof(uint16_t));    
     memcpy(&(buf[4]), &(p->source_address), sizeof(uint16_t));     
     memcpy(&(buf[6]), p->message, message_length + 1);
-    //printf("[SERIALIZE_PACKET] trying to memcpy message %s (%d)into buf[6]\n", p->message, message_length);
-     
-    //print_pkt(buf);
-    
     
     return buf;
 }
@@ -71,15 +58,6 @@ int deserialize_packet(struct packet* p, unsigned char *buf) {
     message_length = p->packet_length - 5;
     
     memcpy(p->message, &(buf[6]), message_length);
-    /*
-    printf("Deserialized packet:\n");
-    printf("\tpacket_length: %d\n", p->packet_length);
-    printf("\tdestination_address: %d\n", p->destination_address);
-    printf("\tsource_address: %d\n", p->source_address);   
-    printf("\tmessage: %s\n", p->message); 
-    */
-    
- 
     
     return 0; 
         

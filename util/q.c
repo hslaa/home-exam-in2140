@@ -66,20 +66,15 @@ struct Node* extract_min(struct Node **q) {
         i += 1; 
     }
     q[min_index] = NULL;
-    
-     
-
     printf("END extract_min()\n"); 
-    return ret_node;    
-        
-
+    
+    return ret_node;     
 }
 
 int free_queue(struct Node **q) {
     int i;
 
     for (i = 0; i < size_of_q; i++) {
-        
         free(q[i]);
     }
     free(q);
