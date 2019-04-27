@@ -30,20 +30,31 @@ struct packet* create_packet(uint16_t destination_address, uint16_t source_addre
 
 unsigned char* serialize_packet(struct packet* p, int message_length) {
     unsigned char *buf;
+    uint16_t  length;
+
+    //buf = malloc(sizeof(struct packet));
     
-    buf = malloc(sizeof(struct packet));
-    printf("Mallocing %zu bytes for serialization_buffer\n", sizeof(struct packet));
-    memcpy(&(buf[0]), &(p->packet_length), sizeof(uint16_t));    
+    length = (sizeof(uint16_t) * 3) + message_length + 1;
+    buf = malloc(length);
+    
+    length = htons(length);
+
+    printf("Mallocing %d bytes for serialization_buffer\n", length);
+    memcpy(&(buf[0]), &(length), sizeof(uint16_t));    
     memcpy(&(buf[2]), &(p->destination_address), sizeof(uint16_t));    
     memcpy(&(buf[4]), &(p->source_address), sizeof(uint16_t));     
-    memcpy(&(buf[6]), p->message, message_length + 1);
+    memcpy(&(buf[6]), p->message, message_length); // + 1 
+    
+     
+    buf[ntohs(length)-1] = '\0';
     
     return buf;
 }
 
 int deserialize_packet(struct packet* p, unsigned char *buf) {
  
-    int message_length;
+    uint16_t message_length;
+
 
 
     memcpy(&p->packet_length, &(buf[0]), sizeof(uint16_t)); 
@@ -55,8 +66,10 @@ int deserialize_packet(struct packet* p, unsigned char *buf) {
     p->source_address = ntohs(p->source_address); 
 
     // Magic number 5 comes from 3*2 - 1 for the \0-byte
-    message_length = p->packet_length - 5;
+    message_length = p->packet_length;
+    printf("deserialize_packet: trying to deserialize message of packet with length %d\n", p->packet_length);   
     
+    printf("trying to memcpy(p->message, &(buf[6]), %d) on buffer of size 2048(?)\n", message_length); 
     memcpy(p->message, &(buf[6]), message_length);
     
     return 0; 
