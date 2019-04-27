@@ -52,6 +52,12 @@ void sssp(struct Node *n, int size) {
         //for each connection in u.connections
         while (j < u->number_of_connections) {
             c = u->connections[j];
+            
+            if (u->connections[j].destination == -1) {
+                j+=1;
+                continue;
+            }
+            
             d = get_pointer_to_node(u->connections[j].destination, size, n);
             alt = u->distance + c.weight;
             printf("%d < %d", alt, d->distance);

@@ -17,7 +17,7 @@ BASE_PORT=$1
 MESSAGES_FILENAME="messages_1.txt"
 LOG_DIR="./logs"
 # Set to "valgrind" to run valgrind on nodes and server
-VALGRIND=""
+VALGRIND="valgrind --leak-check=full --show-leak-kinds=all"
 
 # Put logfiles here
 if [ ! -d $LOG_DIR ]; then
@@ -36,7 +36,7 @@ sleep 1
 
 # Run all nodes
 $VALGRIND ./node $BASE_PORT 1 11:2 103:6         &>"$LOG_DIR/1_log.txt" &
-$VALGRIND ./node $BASE_PORT 11 1:2 13:7 19:2     &>"$LOG_DIR/11_log.txt" &
+$VALGRIND ./node $BASE_PORT 11 1:1 13:7 19:2     &>"$LOG_DIR/11_log.txt" &
 $VALGRIND ./node $BASE_PORT 13 11:7 17:3 101:4   &>"$LOG_DIR/13_log.txt" &
 $VALGRIND ./node $BASE_PORT 17 13:3 107:2        &>"$LOG_DIR/17_log.txt" &
 $VALGRIND ./node $BASE_PORT 19 11:2 101:2 103:1  &>"$LOG_DIR/19_log.txt" &

@@ -170,3 +170,53 @@ int free_routing_tables(struct Node *n, int size) {
 
     return 0;
 }
+
+int check_connection(int own_address, int weight, struct Node node) {
+    int i;
+    
+    printf("testing connections for node %d\n", node.own_address);
+
+
+    for (i = 0; i < node.number_of_connections; i++) {
+        
+        if (node.connections[i].destination == own_address) {
+            if (node.connections[i].weight == weight) {
+                return 1;
+            } else {
+                node.connections[i].destination = -1;
+                return 0;
+            }
+        }
+    }
+
+    return 1;
+}
+
+
+
+int check_connections(struct Node *n, int size) {
+    int i, j;
+    int rev_conn_exists;
+    struct Node dest_node;
+    for (i = 0; i < size; i++) { 
+
+        for (j = 0; j < n[i].number_of_connections; j++) {
+            dest_node = n[get_index_of_node(n[i].connections[j].destination, size, n)];
+
+
+            if (n[i].connections[j].destination == -1) {
+               continue;
+            } 
+
+            rev_conn_exists = check_connection(n[i].own_address, n[i].connections[j].weight, dest_node);
+            
+            
+            if (!rev_conn_exists) {
+                printf("Excluding connection %d -> %d\n", n[i].own_address, n[i].connections[j].destination);
+                n[i].connections[j].destination = -1;                
+            }
+        }
+    }
+
+    return 0;
+}

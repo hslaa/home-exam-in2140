@@ -71,6 +71,9 @@ int main(int argc, char *argv[]) {
      
     struct Node* nodes = receive_nodes(sockfd, num_nodes);   
     
+
+    check_connections(nodes, num_nodes);
+
     test_sssp(nodes, num_nodes);  
 
     
