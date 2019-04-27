@@ -14,8 +14,8 @@ node: $(UTILS) core/node.c
 
 
 run: all
-	bash run.sh
-
+	bash run_1.sh 54321
+	bash run_2.sh 12345
 clean:
 	rm -f routing_server
 	rm -f node
