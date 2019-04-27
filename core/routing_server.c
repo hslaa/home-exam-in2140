@@ -18,8 +18,7 @@
 
 
 #include "../util/sssp.h"
-#include "../util/logger.h"
-#include "../util/print.h"
+
 #include "../util/print_lib.h"
 #include "types/networktypes.h"
 #include "../util/helpers.h"
@@ -56,9 +55,7 @@ int main(int argc, char *argv[]) {
         printf("usage: ./routing_server <base port> <number of nodes>\n");
         exit(EXIT_FAILURE);
     }
-    
-    logger("DEBUG", "Starting routing_server");
-    
+        
     base_port = atoi(argv[1]);
     num_nodes = atoi(argv[2]);
     
@@ -130,7 +127,7 @@ int send_routing_tables(struct Node* n, int size) {
 
 
 
-// this should eventally return struct Node**
+
 struct Node* receive_nodes(int sockfd, int number_of_nodes) {
     int nodes_received, node_socket;
     
@@ -144,8 +141,6 @@ struct Node* receive_nodes(int sockfd, int number_of_nodes) {
     sockets = malloc(sizeof(struct node_socket) * number_of_nodes);
     
 
-    
-
     while (nodes_received < number_of_nodes) {
         addr_len = sizeof(nodeaddr);
         node_socket = accept(sockfd, (struct sockaddr *)&nodeaddr, &addr_len);
@@ -153,9 +148,12 @@ struct Node* receive_nodes(int sockfd, int number_of_nodes) {
         testbuf = receive_node(node_socket);
         deserialize_node(&nodes[nodes_received], testbuf);
         insert_in_sockets(nodes[nodes_received].own_address, node_socket, nodes_received, sockets);
+        
         printf("Added new node to nodes\n"); 
+        
         nodes_received += 1;
         free(testbuf); 
+        
         printf("finished processing node %d out of %d\n", nodes_received, number_of_nodes);
     }
 
@@ -184,13 +182,13 @@ int test_sssp(struct Node *n, int size) {
     struct Node* tmpNode;
     sssp(n, size);
     
-    printf("==== test_sssp() ====\n");
+
     
     
     for (i = 0; i < size; i++) {
         for (j = 0; j < size; j++) {
             pathlen = is_node_on_shortest_path(&n[i], &n[j]);
-            logger("DEBUG", "Running print_weighted_edge()");
+
             print_weighted_edge(n[i].own_address, n[j].own_address, pathlen);
         }
     }
@@ -201,8 +199,6 @@ int test_sssp(struct Node *n, int size) {
    
         while (tmpNode->previous != NULL) {
             printf(" %d --> ", tmpNode->own_address);
-            
-            //cost += tmpNode->distance;
             tmpNode = tmpNode->previous;
         }
         printf("1 (%d)\n", n[i].distance);
@@ -215,7 +211,7 @@ int is_node_on_shortest_path(struct Node* destination, struct Node* intermediate
     int hit_intermediate = 0;
     int pathlen = destination->distance;
     struct Node* tmp_node;
-    logger("DEBUG", "running is_node_on_shortest_path"); 
+
     tmp_node = destination;
     while(tmp_node->previous != NULL) {
         

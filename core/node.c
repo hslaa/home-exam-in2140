@@ -24,7 +24,6 @@
 #include "protocol.h"
 #include "network.h"
 #include "../util/print_lib.h"
-#include "../util/logger.h"
 #include "../util/helpers.h"
 #include "../util/transmission.h"
 
@@ -49,7 +48,7 @@ int main(int argc, char *argv[]) {
 
     int recv_size;
     
-    logger("DEBUG", "Node starting");
+
 
     printf("Node starting with %d arguments\n", argc);
 
