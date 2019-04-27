@@ -12,13 +12,10 @@
 
 
 int get_index_of_node(int own_address, int size_of_array, struct Node *node_array) {
-int i = 0;
-    
-    printf("trying to find node %d in a array of size %d\n", own_address, size_of_array);
+    int i = 0;
 
     while(i < size_of_array) {
         if (node_array[i].own_address == own_address) {
-            printf("Checking array index %d\n", i);
             return i;
         }
         i += 1;
@@ -170,3 +167,35 @@ int free_routing_tables(struct Node *n, int size) {
 
     return 0;
 }
+
+int validate_connections(struct Node* n, int num_nodes) {
+    int i, j, k;
+    
+    struct Node dest_node;
+
+
+    for (i = 0; i < num_nodes; i++) {
+        printf("Validating connections for node %d\n", n[i].own_address);
+
+        for (j = 0; j < n[i].number_of_connections; j++) {
+            printf("\tvalidating connection %d -> %d (%d)\n", n[i].own_address, n[i].connections[j].destination, n[i].connections[j].weight);
+            
+            dest_node = n[get_index_of_node(n[i].connections[j].destination, num_nodes, n)];
+            
+            for (k = 0; k < dest_node.number_of_connections; k++) {
+                
+                if (dest_node.connections[k].destination == n[i].own_address) {
+                  
+                    if (dest_node.connections[k].weight != n[i].connections[j].weight) {
+                        printf("\t\tfound returning connection with different weight. Invalidate\n");
+                        n[i].connections[j].weight = -1;
+                    }
+                }
+            }             
+        }
+    }
+
+    return 0;
+
+}
+

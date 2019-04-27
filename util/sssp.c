@@ -52,6 +52,13 @@ void sssp(struct Node *n, int size) {
         //for each connection in u.connections
         while (j < u->number_of_connections) {
             c = u->connections[j];
+            
+            if (c.weight == -1) {
+                printf("u->connections[%d].destination == -1\n", j);
+                j+=1;
+                continue;
+            }
+
             d = get_pointer_to_node(u->connections[j].destination, size, n);
             alt = u->distance + c.weight;
             printf("%d < %d", alt, d->distance);
@@ -84,16 +91,22 @@ void generate_routing_tables(struct Node* n, int size) {
     for(i = 0; i < size; i++) {
         tmp_node = &n[i];
         destination = n[i].own_address;
+        
+       
         while (tmp_node->previous != NULL) {
             printf("Inserting hop into %d\n", i); 
             insert_hop_in_routing_table(tmp_node->previous, destination, tmp_node->own_address);
             tmp_node = tmp_node->previous;
-        } 
+        }
+        
+ 
+        
+  
     }
     
     tmp_node = get_pointer_to_node(1, size, n);
     
 
     // A hacky way to make sure that Node 1 receives messages for itself.
-    insert_hop_in_routing_table(tmp_node, 1, 1);
+    insert_hop_in_routing_table(tmp_node, 1, 1); 
 }
