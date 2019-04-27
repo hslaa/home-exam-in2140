@@ -3,16 +3,6 @@
 
 #include <stdint.h>
 
-//struct Node;
-//struct Connection;
-
-/*
-typedef struct Graph {
-    // Graph
-} Graph;
-*/
-#define RIDICULOUSLY_MUCH_SPACE = 1024;
-
 typedef struct Connection {
 
     int weight;
