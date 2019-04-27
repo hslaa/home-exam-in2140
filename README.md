@@ -3,15 +3,38 @@ Repository for the take home exam in IN2140 ( Introduction to Operating Systems 
 
 ## Summary
 
+compile the program with
+    
+    make all
+
+run both test scripts with
+    
+    make run
+
+if you see an error in the log files regarding failure to bind port, you need to change the base ports in the make file. 
+
+
+
 ### routing_server
 
 usage: ./routing_server \<Port> \<Number of nodes>
 
-The routing server waits for every node to connect to the server using TCP, providing their neighbouring nodes for the routing server. After every node has connected and provided their neighbouring nodes, the routing_server calculates single source shortest path (SSSP) to every node from the Node 1 using Dijkstra's Algorithm.
+#### Known Issues
+    * Some memory might not get free'd if the program exits because of an error
+    * The program validates connections between nodes that doesn't match, this _might_ lead to an error if a intermediate node quits before all messages are delivered.
+    
+    
 
-After calculating the shortest paths, the server creates a routing table and sends this to the node. This routing table contains pairs (destination:next hop). 
+
+
 
 ### node
 
 usage: node \<Port> \<OwnAddress> \<NeighbourAddress>:<weight> ... 
+
+
+#### Known Issues
+
+    * The nodes should in a better way validate that it has sent/received the full packet. (UDP)
+
 
