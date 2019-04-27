@@ -114,7 +114,8 @@ int main(int argc, char *argv[]) {
         sleep(1);
 
         process_file("data.txt");
-       
+        
+
 
     } else {
         recv_socket = create_receiving_socket(base_port, this.own_address);
@@ -322,14 +323,20 @@ int process_file(char* file_name) {
         
         print_pkt(sendbuf);      
         send_packet(destination_address, sendbuf, ntohs(p->packet_length));
-        
        
+        free(sendbuf); 
+        free(p); 
         receive_packet(recv_socket);
+        
+  
 
-        printf("\n\n\n");
-    } 
+      
+    }
+
+    free(buf);     
+    
+    fclose(fd); 
      
-    fclose(fd);
 
     return 0;
 }
