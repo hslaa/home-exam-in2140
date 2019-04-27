@@ -19,5 +19,5 @@ int free_routing_tables(struct Node *n, int size);
 int test_routing_tables(struct Node* node);
 int create_routing_tables(struct Node *n, int size);
 
-int check_connection(int own_address, int destination, int weight, struct Node node);
-int check_connections(struct Node *n, int size);
+
+int validate_connections(struct Node *n, int size);
