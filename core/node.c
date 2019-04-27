@@ -174,7 +174,7 @@ int handle_packet(unsigned char* packet) {
     p = (struct packet*) malloc(sizeof(struct packet)); 
     deserialize_packet(p, packet);
 
-    printf("received packet with destination %d\n", p->destination_address); 
+    printf("received packet with destination %d\n", p->destination_address);
 
     if (p->destination_address == this.own_address) {
         print_received_pkt(this.own_address, packet);
